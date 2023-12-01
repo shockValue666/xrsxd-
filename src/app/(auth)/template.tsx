@@ -8,7 +8,7 @@ const Template:React.FC<TemplateProps> = ({
     children
 }) => {
   return (
-    <div className='h-screen p-6 flex justify-center'>{children}</div>
+    <div className='h-screen p-6 flex justify-center border border-green-500'>{children}</div>
   )
 }
 

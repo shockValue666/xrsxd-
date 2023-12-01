@@ -1,3 +1,4 @@
+import Header from '@/components/landing-page/header'
 import React from 'react'
 
 interface LayoutProps{
@@ -9,6 +10,7 @@ const layout:React.FC<LayoutProps> = ({
 }) => {
   return (
     <main>
+      <Header/>
         {children}
     </main>
   )
