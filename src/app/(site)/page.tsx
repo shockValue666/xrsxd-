@@ -245,6 +245,7 @@ export default function Home() {
           sm:items-stretch
           items-center
           mt-10'>
+            <h1 className='hidden'>chim</h1>
             {PRICING_CARDS.map((card)=>(
               <CustomCard key={card.planType} 
                 className={clsx("w-[300px] rounded-2xl dark:bg-black/40 background-blur-3xl relative",
