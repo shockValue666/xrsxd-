@@ -77,10 +77,15 @@ const LoginPage = () => {
                 An all-In-One Collaboration and Productivity Platform
             </FormDescription>
             <FormField
+                //isLoading is a return from form form.formState.isSubmitting
                 disabled={isLoading}
-                //control react-hook-form: -an object that contains methods for registering components into React Hook Form
+                //control react-hook-form: -an object that contains methods for registering components into React Hook Form and
+                //handling their submissions
                 control={form.control}
                 name="email"
+                //the render prop is a pattern in react for sharing code between components using a prop whose value
+                //is a function. it takes an arguement here destructed as {field} which provides properties and 
+                //methods related to this specific form field, managed by react-hook-form
                 render={({ field }) => (
                     <FormItem>
                     <FormControl>
