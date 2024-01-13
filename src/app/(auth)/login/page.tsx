@@ -88,10 +88,13 @@ const LoginPage = () => {
                 //methods related to this specific form field, managed by react-hook-form
                 render={({ field }) => (
                     <FormItem>
+                        {/* wraps the actual input control , maybe displays validation states? */}
                     <FormControl>
                         <Input
                         type="email"
                         placeholder="Email"
+                        
+                        // spread syntax in js. passes down all properties and methods from the field object to the input component 
                         {...field}
                         />
                     </FormControl>
