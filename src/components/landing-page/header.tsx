@@ -158,6 +158,9 @@ const Header = () => {
                   outline-none
                   focus:shadow-md
                   "
+                  //flex: enables flexbox
+                  //h-full w-full: sets the width and the height of the element to take up its full container
+                  //select-none: 
                   >
                     Welcome
                   </span>
