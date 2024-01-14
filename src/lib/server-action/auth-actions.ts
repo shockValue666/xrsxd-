@@ -15,6 +15,7 @@ export async function actionLoginUser({email,password}:z.infer<typeof FormSchema
     //client components, server components, server actions, route handlers,
     // to supabase
     const supabase = createRouteHandlerClient({cookies})
+    //how long does the cookie last?
     
     //response returns AuthTokenResponse, it's a JSON object that contains
     //an access token, token type, expiration time, and refresh token. It is 

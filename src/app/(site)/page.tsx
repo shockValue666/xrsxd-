@@ -18,7 +18,7 @@ export default function Home() {
     // <main className="text-3xl text-orange-400	 border border-white">
       <>
         <section className='overflow-hidden px-4 sm:px-6 mt-10 sm:flex sm:flex-col gap-4 md:justify-center md:items-center'>  
-          <TitleSection pill='✨ Your workspace, Perfected' title="Some platform"></TitleSection>
+          <TitleSection pill='✨ Your workspace, Perfected' title="we actually don't need a logout button"></TitleSection>
           <div className='bg-white
           p-[2px]
           mt-6

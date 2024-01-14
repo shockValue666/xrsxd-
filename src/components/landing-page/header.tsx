@@ -13,8 +13,10 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
   NavigationMenuViewport,
+  //navigationMenuTriggerStyle is a classname(?) that 
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
+//a collection of links for navigating websites ^^
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 
@@ -72,11 +74,24 @@ const Header = () => {
       justify-center
       items-center
   "
+  //flex layout in the header, flexible alignment of children
+  //justify-center: provide children with horizontal central alignment
+  //items-center: provide children central vertical alignment
     >
+      {/* Link is used for client side navigation aka NO refresh */}
+      {/* <a></a> performs full page refresh */}
       <Link
         href={'/'}
         className="w-full flex gap-2
         justify-left items-center"
+        //w-full: the link's width takes up 100$ of its parents container
+        //flex: flexbox layout to the link, enabling flexible
+        //alignment of child elements
+        //justofy-left: aligns children of this flex container
+        //to the start(;eft) pf the container.
+        //gap-2: add a small space (8px by default) between child
+        //elements of this flex container
+        //items-center: vertically centers the child elements within the flex container
       >
         <Image
           src={Logo}
@@ -88,14 +103,22 @@ const Header = () => {
           className="font-semibold
           dark:text-white
         "
+        //dark:text-white conditional class for dark mode.
         >
           cypress.
         </span>
       </Link>
       <NavigationMenu className="hidden md:block">
+        {/* hidden: hides the element by default
+        md:block  -responsive class, -the element will be displayed as a block-level element on medium-sized screens 
+        and larger, making it visible only on these screens
+         */}
         <NavigationMenuList className="gap-6">
+          {/* gap 6: creates a spacing of 24 pixels (6 times the base spacing unit) between the elements inside
+          the NavigationMenuList */}
           <NavigationMenuItem>
             <NavigationMenuTrigger
+            //this is a trigger element: ... -it changes the path to #resouces when triggered -
               onClick={() => setPath('#resources')}
               className={cn({
                 'dark:text-white': path === '#resources',
@@ -103,20 +126,26 @@ const Header = () => {
                 'font-normal': true,
                 'text-xl': true,
               })}
+              // TODO: fix this shit with the color of the navigation items on hover
+              //cn is used for conditional styling it's a little buggy it needs to be fixed
             >
               Resources
             </NavigationMenuTrigger>
             <NavigationMenuContent>
+              {/* obviously it's the content of the submenu of each navigation item */}
               <ul
                 className="grid
                 gap-3
                 p-6
                 md:w-[400px]
-                ld:w-[500px]
+                lg:w-[500px]
                 lg:grid-cols-[.75fr_1fr]
                 "
+                //the reason on smaller screens we have 1 column is that the default grid is 1 column
+                //but on the larger and up it's 2 because we explicitly declare it lg:grid-cols-[.75fr_1fr]
               >
-                <li className="row-span-3">
+                <li className="row-span-45 border border-green-500">
+                  {/* row-span: this list items is set to span 3 rows in a grid container */}
                   <span
                     className="flex h-full w-full select-none
                   flex-col
