@@ -119,7 +119,7 @@ const Header = () => {
           <NavigationMenuItem>
             <NavigationMenuTrigger
             //this is a trigger element: ... -it changes the path to #resouces when triggered -
-              onClick={() => setPath('#resources')}
+              onClick={() => setPath('#resources')} //TODO: hmm maybe turn that to onHover?
               className={cn({
                 'dark:text-white': path === '#resources',
                 'dark:text-white/40': path !== '#resources',
@@ -139,13 +139,18 @@ const Header = () => {
                 p-6
                 md:w-[400px]
                 lg:w-[500px]
-                lg:grid-cols-[.75fr_1fr]
+                lg:grid-cols-[_.75fr_1fr]
                 "
                 //the reason on smaller screens we have 1 column is that the default grid is 1 column
                 //but on the larger and up it's 2 because we explicitly declare it lg:grid-cols-[.75fr_1fr]
               >
-                <li className="row-span-45 border border-green-500">
-                  {/* row-span: this list items is set to span 3 rows in a grid container */}
+                <li className="row-span-3 col-span-1 border border-green-500">
+                  {/* row-span: this list items is set to span 3 rows in a grid container ... 
+                  damn i actually think it does lol. actually row-span changes the space 
+                  the welcome component takes up. in particular it expresses the number 
+                  of columns of the grid.
+                  col-span-1: overwrites lg:grid-cols-[_.75fr_1fr]
+                  */}  
                   <span
                     className="flex h-full w-full select-none
                   flex-col
@@ -160,7 +165,10 @@ const Header = () => {
                   "
                   //flex: enables flexbox
                   //h-full w-full: sets the width and the height of the element to take up its full container
-                  //select-none: 
+                  //select-none: prevents the text within to be selctable
+                  //justify-end: aligns it in the end of the container which is the li instance
+                  // muted: colors
+                  //
                   >
                     Welcome
                   </span>
@@ -316,3 +324,23 @@ const ListItem = React.forwardRef<
 });
 
 ListItem.displayName = 'ListItem';
+
+
+
+// Link with Logo: Next.js <Link> around <Image>, navigates to home without full refresh.
+// NavigationMenu: Likely a <nav>, holds navigation structure.
+// Menu Items: NavigationMenuList contains NavigationMenuItem with NavigationMenuTrigger and NavigationMenuContent.
+// Submenu Grid: ul in NavigationMenuContent has one column, two on large screens (lg:grid-cols-[.75fr_1fr]).
+// ListItems: Represents options like "Introduction", "Installation" with titles and descriptions.
+// Additional Items: More NavigationMenuItem for sections like "Pricing", "Testimonials".
+// Login/Signup Buttons: On the right, in <Link>, for seamless navigation.
+
+
+
+// ogo Link: Uses Next.js <Link>; no page refresh on navigation.
+// Navigation Structure: Housed in NavigationMenu, possibly a <nav> tag.
+// Menu Components: NavigationMenuList with items; NavigationMenuTrigger and NavigationMenuContent included.
+// Responsive Grid: One column in ul, two in larger screens (lg:grid-cols-[.75fr_1fr]).
+// Option Representation: ListItem for various sections; has titles and descriptions.
+// More Menu Items: Additional sections like "Pricing", "Testimonials".
+// Login/Signup: Right-aligned, seamless navigation with <Link>.
