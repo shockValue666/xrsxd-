@@ -224,7 +224,7 @@ const Header = () => {
             </NavigationMenuContent>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuContent>
+            {/* <NavigationMenuContent>
               <ul
                 className="grid w-[400px]
               gap-3
@@ -244,6 +244,21 @@ const Header = () => {
                   </ListItem>
                 ))}
               </ul>
+            </NavigationMenuContent> */}
+            <NavigationMenuTrigger onClick={()=>console.log("my cock")}>
+
+            </NavigationMenuTrigger>
+            <NavigationMenuContent>
+            <NavigationMenuLink
+              className={cn(navigationMenuTriggerStyle(), {
+                'dark:text-white': path === '#testimonials',
+                'dark:text-white/40': path !== '#testimonials',
+                'font-normal': true,
+                'text-xl': true,
+              })}
+            >
+              Testimonial
+            </NavigationMenuLink>
             </NavigationMenuContent>
           </NavigationMenuItem>
           <NavigationMenuItem>

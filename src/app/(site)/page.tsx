@@ -5,6 +5,7 @@ import Banner from '../../../public/appBanner.png'
 import Cal from '../../../public/cal.png'
 import Diamond from '../../../public/icons/diamond.svg'
 import CheckIcon from '../../../public/icons/check.svg'
+// a bunch of images
 import { CLIENTS, PRICING_CARDS, PRICING_PLANS, USERS } from '@/lib/constants';
 import { randomUUID } from 'crypto';
 import { twMerge } from 'tailwind-merge';
@@ -19,6 +20,8 @@ export default function Home() {
       <>
         <section className='overflow-hidden px-4 sm:px-6 mt-10 sm:flex sm:flex-col gap-4 md:justify-center md:items-center'>  
           <TitleSection pill='✨ Your workspace, Perfected' title="we actually don't need a logout button"></TitleSection>
+          {/* this is a title section that is the call column diatomi like sxima at the top 
+          also it's the big letter text following up*/}
           <div className='bg-white
           p-[2px]
           mt-6
@@ -28,6 +31,10 @@ export default function Home() {
           to-brand-primaryBlue
           sm:w-[300px]
           '>
+            {/* padding is 2 px everywhere, and margin top is 6,
+            it is rounded with big angles and 
+            has a gradient blueish and in the small screens it's 300px which is like 1/3
+            in mobile */}
             <Button
               variant={'secondary'}
               className='w-full
@@ -36,8 +43,12 @@ export default function Home() {
               text-2xl
               bg-background'
             >
-              
+             some 
             </Button>
+            {/* -this is the main button that is see as i enter and it look impressive af */}
+            {/* -it takes up the whole screen in mobiles and a smaller part in desktops
+            -it is rounded with significant angles, 
+            -it has dark background */}
           </div>
           <div className='md:mt-[-90px]
           sm:w-full
@@ -49,6 +60,7 @@ export default function Home() {
           sm:ml-0
           ml-[-50px]'>
             <Image src={Banner} alt={'Application Banner'}/>
+            {/* to screenshot apo to app lol */}
             <div className='bottom-0
             top-[50%]
             bg-gradient-to-t
@@ -58,12 +70,45 @@ export default function Home() {
             absolute
             z-10
             '>
-
+              {/* idk what top-[50%] means, it means: the top position of the element is being set to 50% of its parents container's height
+              -the element is positioned such that its top edge is at the vertical midpoint (50%) of its parent container. This is often used 
+              for vertically centering elements within a conatiner */}
             </div>
           </div>
         </section>
         <section className="relative">
+          {/* moving carusel shit 
+          -the CLIENTS is an object that contains two properties: an alt and a logo,
+          -obv the logos are the ones appearing on the page looking like real brands
+          -it's a horizontally moving scrolling carousel of client logos
+          - Import statements: it imports various dependencies, including other components, images, constants, utility
+          functions, and CSS classes. 
+          - Functional Component: this component is defined as Home
+          - Section Division: The component is divided into different sections: and each section has its own tag
+           */}
+
+           {/* first half: 
+            -initially it's hidden
+            -then we provide display to be flex
+            -then we provide after: property. after: it is used along before:: in order to create additional
+            styling elements. These pseudo-elements are styled with gradient background, and their position and dimensions are 
+            maniupulated to create visual effects. 
+            -after:content[] before:content[] the content of the pseudo-elements is set to a "" empty string to ensure
+            that they don't display any kind of content by default. In this case they are used purely for styling
+            -after:dark:from-brand-dark and before:dark:from-brand-dark: apply dark theeme to the pseudo-elements
+            -after:to-transparent and before:to-transparent: these pseudo-elements should transition to a transparent state,
+            the transition occurs when a user interacts or animation is triggered.
+            -after:from-background and before:from-background: the pseudo-elements should transition from a background
+            color defined by the 
+            -after:bg-gradient-to-l and before:bg-gradient-to-r: define gradient background for the pseudoshits
+            -after:right-0, after:bottom-0, after:top-0, before:left-0, before:top-0, before:bottom-0: the position
+            of the pseudo-elemens before and after
+            -the width
+            -the z index
+            -and the positioning
+            */}
           <div
+
             className="overflow-hidden
             flex
             after:content['']

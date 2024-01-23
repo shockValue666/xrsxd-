@@ -6,8 +6,11 @@ interface TitleSectionProps{
     pill:string;
 }
 
+//type of props of title
+
 const TitleSection:React.FC<TitleSectionProps> = ({title,subheading
 ,pill}) => {
+    //it receives as argumentst title, subheading and pill
   return (
     <React.Fragment>
         <section
@@ -19,6 +22,8 @@ const TitleSection:React.FC<TitleSectionProps> = ({title,subheading
             md:items-center
             '
         >
+            {/* column flex with between gap 4, the items are vertically aligned at start in big screens and in the center on medium and smaller screens */}
+
             <article className='rounded-full
             p-[1px]
             text-sm
