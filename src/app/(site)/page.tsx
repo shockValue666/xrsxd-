@@ -1,4 +1,5 @@
 import TitleSection from '@/components/landing-page/title-section'
+//pill and title, title is optional, not really
 import Image from 'next/image'
 import { Button } from '@/components/ui/button';
 import Banner from '../../../public/appBanner.png'

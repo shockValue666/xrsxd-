@@ -1,20 +1,25 @@
 "use client";
-import React from 'react'
+import React ,{useEffect}from 'react'
 import {AuthUser} from '@supabase/supabase-js'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies';
 
 interface DashboardSetupProps{
     user:AuthUser;
     subscription:{} | null;
+    // cook: () => ReadonlyRequestCookies;
 }
 
 
 const DashboardSetup:React.FC<DashboardSetupProps> = () => {
+
+  useEffect(()=>{console.log("logged")},[])
   return (
     <Card className='w-[800px] h-screen sm:h-auto'>
       <CardHeader>
         <CardTitle>
-          Create a workspace
+          Create a workspace, i will have a tinder/tiktok like algorithm that will show trending videos and they will choose one and follow it etc
+          or render from their youtube account with google authentication
         </CardTitle>
         <CardDescription>
           Lets create a private workspace to get you started.You can add
@@ -25,7 +30,9 @@ const DashboardSetup:React.FC<DashboardSetupProps> = () => {
         <form onSubmit={()=>{console.log("")}} action="">
           <div className='flex flex-col gap-4'>
             <div className='flex items-center gap-4'>
-              <div className='text-5xl'></div>
+              <div className='text-5xl'>
+                tsoloz
+              </div>
             </div>
           </div>
         </form>
