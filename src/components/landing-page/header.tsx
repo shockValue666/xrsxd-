@@ -84,7 +84,7 @@ const Header = () => {
         href={'/'}
         className="w-full flex gap-2
         justify-left items-center"
-        //w-full: the link's width takes up 100$ of its parents container
+        //w-full: the link's width takes up 100% of its own (not parent's ig) container
         //flex: flexbox layout to the link, enabling flexible
         //alignment of child elements
         //justofy-left: aligns children of this flex container
