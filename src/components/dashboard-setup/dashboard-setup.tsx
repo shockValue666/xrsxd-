@@ -13,9 +13,13 @@ interface DashboardSetupProps{
 
 const DashboardSetup:React.FC<DashboardSetupProps> = () => {
 
+  const dosth = async () =>{
+    
+  }
+
   useEffect(()=>{console.log("logged")},[])
   return (
-    <Card className='w-[800px] h-screen sm:h-auto'>
+    <Card className='lg:w-[800px] h-screen sm:h-auto w-[100%]'>
       <CardHeader>
         <CardTitle>
           Create a workspace, i will have a tinder/tiktok like algorithm that will show trending videos and they will choose one and follow it etc
@@ -27,7 +31,7 @@ const DashboardSetup:React.FC<DashboardSetupProps> = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={()=>{console.log("")}} action="">
+        <form onSubmit={async ()=>{console.log("");await dosth();}} action="">
           <div className='flex flex-col gap-4'>
             <div className='flex items-center gap-4'>
               <div className='text-5xl'>

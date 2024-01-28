@@ -458,11 +458,14 @@ export type Enums<
   export type Folder = InferSelectModel<typeof folders>;
   export type File = InferSelectModel<typeof files>;
   export type Product = InferSelectModel<typeof products>;
-  export type Price = InferSelectModel<typeof prices> & {products?: Product};
-  export type Customer = InferSelectModel<typeof customers>;
-  export type Subscription = InferSelectModel<typeof subscriptions> & {prices?: Price};
+  export type Price = InferSelectModel<typeof prices> & {products?: Product}; //obviously the type Price will also include products property
+  export type Customer = InferSelectModel<typeof customers>; 
+  export type Subscription = InferSelectModel<typeof subscriptions> & {prices?: Price}; //same with Price
 
   export type ProductWithPrice = Product & {
     prices?:Price[]
   }
 
+
+
+  

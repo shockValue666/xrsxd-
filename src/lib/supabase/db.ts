@@ -1,3 +1,5 @@
+//in general this object is used to communicate with the database, not authentication
+//exclusively accessible to server components
 import {drizzle} from 'drizzle-orm/postgres-js' 
 //postgres client 
 import postgres from 'postgres';
