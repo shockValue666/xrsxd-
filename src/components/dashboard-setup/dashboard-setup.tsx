@@ -3,6 +3,7 @@ import React ,{useEffect}from 'react'
 import {AuthUser} from '@supabase/supabase-js'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies';
+import EmojiPicker from '../global/emoji-picker';
 
 interface DashboardSetupProps{
     user:AuthUser;
@@ -35,7 +36,9 @@ const DashboardSetup:React.FC<DashboardSetupProps> = () => {
           <div className='flex flex-col gap-4'>
             <div className='flex items-center gap-4'>
               <div className='text-5xl'>
-                tsoloz
+                <EmojiPicker getValue={()=>{}} >
+                  tsoloz
+                </EmojiPicker>
               </div>
             </div>
           </div>
