@@ -42,7 +42,7 @@ const DashboardSetup:React.FC<DashboardSetupProps> = ({
 
   const onCli:SubmitHandler<z.infer<typeof CreateWorkspaceFormSchema>> = async (value,event) => {
     event?.preventDefault();
-    const file = value.file;
+    const file = value.file[0];
     console.log("file: ",file);
     const workspaceUUID = v4() //ok lol it just generates a uuid
     console.log("workspaceuuid: ",workspaceUUID)
@@ -51,7 +51,7 @@ const DashboardSetup:React.FC<DashboardSetupProps> = ({
         // const {data} = await supabase.storage.from('workspace-logos').getPublicUrl('4.jpeg')
         const {data,error} = await supabase.storage.from('workspace-logos').upload(`workspaceLogo.${workspaceUUID}`,file,{
           cacheControl:'3600',
-          upsert:true
+          // upsert:true
         })
         if(error){
           console.log("error: at uploading",error)
