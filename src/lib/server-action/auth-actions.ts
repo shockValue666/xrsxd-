@@ -4,6 +4,10 @@ import { FormSchema } from "../types";
 import {createRouteHandlerClient} from '@supabase/auth-helpers-nextjs'
 import { cookies } from "next/headers";
 
+export async function actionLogCock(){
+    console.log("cockies: ",cookies().getAll())
+}
+
 
 export async function actionLoginUser({email,password}:z.infer<typeof FormSchema>){
 
@@ -15,6 +19,7 @@ export async function actionLoginUser({email,password}:z.infer<typeof FormSchema
     //client components, server components, server actions, route handlers,
     // to supabase
     const supabase = createRouteHandlerClient({cookies})
+    // console.log("cockies: ",cookies)
     //how long does the cookie last?
     
     //response returns AuthTokenResponse, it's a JSON object that contains
@@ -52,8 +57,6 @@ export async function actionSignUpUser({email,password}:z.infer<typeof FormSchem
     })
     return response;
 }
-
-
 // response:  {
 //     data: {
 //       user: {
@@ -83,3 +86,13 @@ export async function actionSignUpUser({email,password}:z.infer<typeof FormSchem
 //     },
 //     error: null
 //   }
+
+
+// cockies:  [
+//     {
+//       name: 'somerandomauthtoken',
+//       value: '["some valye]',
+//       path: '/'
+//     }
+//   ]
+  
