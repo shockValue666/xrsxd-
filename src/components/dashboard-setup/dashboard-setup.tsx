@@ -1,5 +1,5 @@
 "use client";
-import React ,{useEffect, useState}from 'react'
+import React ,{useEffect, useReducer, useState}from 'react'
 import {AuthUser} from '@supabase/supabase-js'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies';
@@ -9,12 +9,17 @@ import { Input } from '../ui/input';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import { Button } from '../ui/button';
 import { actionLogCock } from '@/lib/server-action/auth-actions';
-import { Subscription } from '@/lib/supabase/supabase.types';
+import { Subscription, workspace } from '@/lib/supabase/supabase.types';
 import { CreateWorkspaceFormSchema } from '@/lib/types';
 import { z } from 'zod';
 import Loader from '../global/Loader';
 import {v4} from 'uuid'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useToast } from '../ui/use-toast';
+import { createWorkspace } from '@/lib/supabase/queries';
+import { useAppState } from '@/lib/providers/state-provider';
+import { useRouter } from 'next/navigation';
+import { ToastAction } from '../ui/toast';
 
 interface DashboardSetupProps{
     user:AuthUser;
@@ -26,6 +31,8 @@ interface DashboardSetupProps{
 const DashboardSetup:React.FC<DashboardSetupProps> = ({
   user,subscription
 }) => {
+  const {toast} = useToast()
+  const router= useRouter();
   const [selectedEmoji,setSelectedEmoji] = useState("poutsa");
   const supabase = createClientComponentClient()
   const {register,handleSubmit,reset, formState:{isSubmitting:isLoading,errors}} = useForm<z.infer<typeof CreateWorkspaceFormSchema>>({
@@ -35,31 +42,106 @@ const DashboardSetup:React.FC<DashboardSetupProps> = ({
       workspaceName:""
     }
   });
+  const { dispatch } = useAppState();
 
   const dosth = async () =>{
     console.log("i am doing someshit")
+    toast({
+      variant:"destructive",
+      title:"cock",
+      action:(
+        <ToastAction altText="Couldn't upload the cock">Errorlolcock</ToastAction>
+      )
+    })
   }
 
   const onCli:SubmitHandler<z.infer<typeof CreateWorkspaceFormSchema>> = async (value,event) => {
     event?.preventDefault();
     const file = value.file[0];
-    console.log("file: ",file);
+    // console.log("file: ",file);
+    let filePath=null;
     const workspaceUUID = v4() //ok lol it just generates a uuid
-    console.log("workspaceuuid: ",workspaceUUID)
+    // console.log("workspaceuuid: ",workspaceUUID)
     if(file){
       try{
         // const {data} = await supabase.storage.from('workspace-logos').getPublicUrl('4.jpeg')
-        const {data,error} = await supabase.storage.from('workspace-logos').upload(`workspaceLogo.${workspaceUUID}`,file,{
+        const {data,error} = await supabase.storage.from('workspace-logos').upload(`workspaceLogoFromMyCock.${workspaceUUID}`,file,{
           cacheControl:'3600',
           // upsert:true
         })
         if(error){
           console.log("error: at uploading",error)
+          toast({
+            variant: 'destructive',
+            title: 'Error! Could not upload your workspace logo',
+            action:(
+              <ToastAction altText="Couldn't upload the shit">Errorlol</ToastAction>
+            )
+          });
         }
-        console.log("data: ",data);
+        filePath=data?.path || null;
+        // console.log("data: ",data);
 
       }catch(error){
         console.log("erorrorororo: ",error)
+        toast({
+          variant: 'destructive',
+          title: 'Error! Could not upload your workspace logo',
+          action:(
+            <ToastAction altText="Couldn't upload the shit workspace logo">Errorlollogo</ToastAction>
+          )
+        });
+      }
+
+      try {
+        const newWorkspace: workspace = {
+          data:null,
+          createdAt:new Date().toISOString(),
+          iconId: selectedEmoji,
+          id: workspaceUUID,
+          inTrash:"",
+          title: value.workspaceName,
+          workspaceOwner:user.id,
+          logo:filePath,
+          bannerUrl:""
+        }
+        console.log("new workspace: asdsfasdfadsfasd",newWorkspace)
+        const {data,error:createError} = await createWorkspace(newWorkspace);
+//        bring crateWorkspace here and piece by piece fix it
+        if(data) {
+          console.log("data from crating new workspace: ",data)
+        } else if(createError) {
+          console.log("craet error: ",createError)
+        }
+        if(createError){
+          throw new Error();
+        }
+        dispatch({
+          type:"ADD_WORKSPACE",
+          payload:{... newWorkspace,folders: [] }
+        })
+        toast({
+          title: 'Workspace Created',
+          description: `${newWorkspace.title} has been created successfully.`,
+          action:(
+            <ToastAction altText="Workspace created suxesfully">SUXES</ToastAction>
+          )
+        })
+        
+        router.replace(`/dashboard/${newWorkspace.id}`);
+      } catch (error) {
+        console.log("error from the workspace creation ig: ", error)
+        toast({
+          variant: 'destructive',
+          title: 'Could not create your workspace',
+          description:
+            "Oops! Something went wrong, and we couldn't create your workspace. Try again or come back later.",
+          action:(
+            <ToastAction altText="Couldn't create the workspace">Errorlolspace</ToastAction>
+          )
+        });
+      }finally {
+        reset();
       }
     }
   }
@@ -67,41 +149,6 @@ const DashboardSetup:React.FC<DashboardSetupProps> = ({
   // const onSubmit: SubmitHandler<
   //     z.infer<typeof CreateWorkspaceFormSchema>
   //   > = async (value) => {
-  //     const file = value.logo?.[0];
-  //     let filePath = null;
-  //     const workspaceUUID = v4();
-  //     console.log(file);
-
-  //     if (file) {
-  //       try {
-  //         const { data, error } = await supabase.storage
-  //           .from('workspace-logos')
-  //           .upload(`workspaceLogo.${workspaceUUID}`, file, {
-  //             cacheControl: '3600',
-  //             upsert: true,
-  //           });
-  //         if (error) throw new Error('');
-  //         filePath = data.path;
-  //       } catch (error) {
-  //         console.log('Error', error);
-  //         toast({
-  //           variant: 'destructive',
-  //           title: 'Error! Could not upload your workspace logo',
-  //         });
-  //       }
-  //     }
-  //     try {
-  //       const newWorkspace: workspace = {
-  //         data: null,
-  //         createdAt: new Date().toISOString(),
-  //         iconId: selectedEmoji,
-  //         id: workspaceUUID,
-  //         inTrash: '',
-  //         title: value.workspaceName,
-  //         workspaceOwner: user.id,
-  //         logo: filePath || null,
-  //         bannerUrl: '',
-  //       };
   //       const { data, error: createError } = await createWorkspace(newWorkspace);
   //       if (createError) {
   //         throw new Error();
@@ -153,7 +200,7 @@ const DashboardSetup:React.FC<DashboardSetupProps> = ({
                 </EmojiPicker>
               </div>
               <Button
-                onClick={()=>{actionLogCock()}}
+                onClick={()=>{actionLogCock();dosth()}}
               >
                 cock
               </Button>
@@ -187,6 +234,7 @@ const DashboardSetup:React.FC<DashboardSetupProps> = ({
             <div className="self-end">
               <Button
                 type="submit"
+                disabled={isLoading}
               >
                 {!isLoading ? 'Create Workspace' : <Loader />}
               </Button>

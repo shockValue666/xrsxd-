@@ -32,7 +32,7 @@ const Dashboard = async () => {
   if(subscriptionError) return;
 
 
-  if(!workspace){
+  if(!workspace || workspace){
     return (
       <div className='bg-background h-screen w-screen flex justify-center items-center border border-green-500'>
         <div>
@@ -41,7 +41,7 @@ const Dashboard = async () => {
       </div>
     )
   }
-  redirect(`/dashboard/${workspace.id}`)
+  // redirect(`/dashboard/${workspace.id}`)
 }
 
 export default Dashboard
