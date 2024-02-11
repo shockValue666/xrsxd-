@@ -1,9 +1,10 @@
 'use server';
-import { files, folders, workspaces } from "../../../migrations/schema";
+import { files, folders, users, workspaces } from "../../../migrations/schema";
 import db from "./db"
 import {Folder, Subscription, workspace} from './supabase.types'
 import {validate} from 'uuid'
-import {eq} from 'drizzle-orm'
+import {and, eq, notExists} from 'drizzle-orm'
+import { collaborators } from "./schema";
 
 export const getUserSubscriptionStatus = async (userId:string) =>{
 
@@ -100,6 +101,60 @@ export const  getPrivateWorkspaces = async (userId:string) => {
         data:workspaces.data,
         inTrash:workspaces.inTrash,
         logo:workspaces.logo
-    }).from(workspaces)
-        // .where(and(notExists(db.select().from(collaborators))))
+    })
+    .from(workspaces)
+    .where(
+        and(
+          notExists(
+            db
+              .select()
+              .from(collaborators)
+              .where(eq(collaborators.workspaceId, workspaces.id))
+          ),
+          eq(workspaces.workspaceOwner, userId)
+        )
+      ) as workspace[];
+    return privateWorkspaces;
+}
+
+export const getCollaboratingWorkspaces = async (userId:string) => {
+    if(!userId) return [];
+    const collaboratedWorkspaces = await db.select({
+        id:workspaces.id,
+        createdAt:workspaces.createdAt,
+        workspaceOwner:workspaces.workspaceOwner,
+        title: workspaces.title,
+        iconId:workspaces.iconId,
+        data:workspaces.data,
+        inTrash:workspaces.inTrash,
+        logo:workspaces.logo
+    })
+        .from(users)
+        .innerJoin(collaborators,eq(users.id,collaborators.userId))
+        .innerJoin(workspaces,eq(collaborators.workspaceId,workspaces.id))
+        .where(eq(users.id,userId)) as workspace[]
+
+    return collaboratedWorkspaces;
+
+}
+
+export const getSharedWorkspaces = async (userId:string) => {
+    if(!userId) return [];
+    const collaboratedWorkspaces = await db.select({
+        id:workspaces.id,
+        createdAt:workspaces.createdAt,
+        workspaceOwner:workspaces.workspaceOwner,
+        title: workspaces.title,
+        iconId:workspaces.iconId,
+        data:workspaces.data,
+        inTrash:workspaces.inTrash,
+        logo:workspaces.logo
+    })
+        .from(users)
+        .innerJoin(collaborators,eq(users.id,collaborators.userId))
+        .innerJoin(workspaces,eq(collaborators.workspaceId,workspaces.id))
+        .where(eq(users.id,userId)) as workspace[]
+
+    return collaboratedWorkspaces;
+
 }

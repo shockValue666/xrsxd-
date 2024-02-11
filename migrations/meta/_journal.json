@@ -5,15 +5,22 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1699974124768,
-      "tag": "0000_fearless_may_parker",
+      "when": 1707602796112,
+      "tag": "0000_freezing_green_goblin",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "5",
-      "when": 1699974901985,
-      "tag": "0001_bright_mattie_franklin",
+      "when": 1707602996502,
+      "tag": "0001_motionless_madame_web",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1707606010608,
+      "tag": "0002_pink_nico_minoru",
       "breakpoints": true
     }
   ]
