@@ -97,6 +97,15 @@ export const collaborators = pgTable('collaborators', {
         .notNull()
         .references(() => users.id, { onDelete: 'cascade' }),
 });
-  
+
+export const cocksuckers = pgTable("cocksuckers", {
+    id:uuid('id').defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp('created_at',{
+        withTimezone:true,
+        mode:"string"
+    }),
+    userId: uuid('user_id').notNull().references(()=>users.id,{onDelete:"cascade"})
+})
+
 
 export {};
