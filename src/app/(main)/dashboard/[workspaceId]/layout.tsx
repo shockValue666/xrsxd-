@@ -1,4 +1,5 @@
 import Sidebar from '@/components/sidebar/sidebar';
+import { Toaster } from '@/components/ui/toaster';
 import React from 'react'
 
 
@@ -20,6 +21,7 @@ const Layout:React.FC<LayoutProps> = ({children,params}) => {
         '>
             {children}
         </div>
+        <Toaster />
     </main>
   )
 }
