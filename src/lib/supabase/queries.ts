@@ -3,7 +3,7 @@ import { files, folders, users, workspaces } from "../../../migrations/schema";
 import db from "./db"
 import {Folder, Subscription, User, workspace} from './supabase.types'
 import {validate} from 'uuid'
-import {and, eq, notExists} from 'drizzle-orm'
+import {and, eq, ilike, notExists} from 'drizzle-orm'
 import { collaborators } from "./schema";
 
 export const getUserSubscriptionStatus = async (userId:string) =>{
@@ -140,22 +140,24 @@ export const getCollaboratingWorkspaces = async (userId:string) => {
 
 export const getSharedWorkspaces = async (userId:string) => {
     if(!userId) return [];
-    const collaboratedWorkspaces = await db.select({
-        id:workspaces.id,
-        createdAt:workspaces.createdAt,
-        workspaceOwner:workspaces.workspaceOwner,
-        title: workspaces.title,
-        iconId:workspaces.iconId,
-        data:workspaces.data,
-        inTrash:workspaces.inTrash,
-        logo:workspaces.logo
-    })
-        .from(users)
-        .innerJoin(collaborators,eq(users.id,collaborators.userId))
-        .innerJoin(workspaces,eq(collaborators.workspaceId,workspaces.id))
-        .where(eq(users.id,userId)) as workspace[]
-
-    return collaboratedWorkspaces;
+    const sharedWorkspaces = (await db
+        .selectDistinct({
+          id: workspaces.id,
+          createdAt: workspaces.createdAt,
+          workspaceOwner: workspaces.workspaceOwner,
+          title: workspaces.title,
+          iconId: workspaces.iconId,
+          data: workspaces.data,
+          inTrash: workspaces.inTrash,
+          logo: workspaces.logo,
+          bannerUrl: workspaces.bannerUrl,
+        })
+        .from(workspaces)
+        .orderBy(workspaces.createdAt)
+        .innerJoin(collaborators, eq(workspaces.id, collaborators.workspaceId))
+        .where(eq(workspaces.workspaceOwner, userId))) as workspace[];
+    
+        return sharedWorkspaces;
 
 }
 
@@ -166,4 +168,29 @@ export const addCollaborators = async (users:User[],workspaceId:string) => {
         });
         if(!userExists) await db.insert(collaborators).values({workspaceId,userId:user.id})
     })
+}
+
+export const getUsersFromSearch = async (email:string) => {
+    if(!email) return [];
+    const account = db.select().from(users).where(ilike(users.email,`${email}%`)); //one or 2? 
+    return account;
+}
+
+export const createFolder = async(folder:Folder) => {
+    try{
+        const response = await db.insert(folders).values(folder);
+        return {data:null,error:null}
+    }catch(err){
+        console.log("error at creating folder: ",err)
+        return {data:null,error:"Error at creating a folder"}
+    }
+}
+
+export const updateFolder = async (folder:Partial<Folder>,folderId:string) => {
+    try {
+        await db.update(folders).set(folder).where(eq(folders.id,folderId))
+        return {data:null,error:null}
+    } catch (error) {
+        return {data:null,error:`Error at updating the folder: ${error}`} 
+    }
 }

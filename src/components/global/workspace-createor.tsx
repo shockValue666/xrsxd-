@@ -13,7 +13,7 @@ import {
     SelectValue,
   } from "@/components/ui/select"
 import { SelectGroup } from '@radix-ui/react-select';
-import { Lock, Share } from 'lucide-react';
+import { Divide, Lock, Plus, Share } from 'lucide-react';
 import { Button } from '../ui/button';
 import { v4 } from 'uuid';
 import { addCollaborators, createWorkspace } from '@/lib/supabase/queries';
@@ -21,9 +21,17 @@ import { useAppState } from '@/lib/providers/state-provider';
 import { ToastAction } from '../ui/toast';
 import { useToast } from '../ui/use-toast';
 import CollaboratorSearch from './collaborator-search';
+import { ScrollArea } from '../ui/scroll-area';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
   
 
-const WorkspaceCreator = () => {
+interface WorkspaceCreatorProps {
+    setIsOpen:React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const WorkspaceCreator:React.FC<WorkspaceCreatorProps> = ({
+    setIsOpen
+}) => {
     const {dispatch} = useAppState();
     const {toast} = useToast();
     const [permissions,setPermissions] = useState("private");
@@ -31,6 +39,7 @@ const WorkspaceCreator = () => {
     const [collaborators,setCollaborators] = useState<User[]>([]);
     const {user} = useSupabaseUser();
     const router = useRouter();
+    const [isLoading,setIsLoading] = useState(false);
 
     const addCollaborator = (user:User) => {
         setCollaborators([...collaborators,user]);
@@ -40,6 +49,7 @@ const WorkspaceCreator = () => {
         setCollaborators(collaborators.filter(c=>c.id!==user.id))
     }
     const createItem = async () => {
+        setIsLoading(true)
         const uuid = v4();
         if(user?.id){
             const newWorkspace:workspace = {
@@ -73,8 +83,21 @@ const WorkspaceCreator = () => {
             if(permissions === "shared"){
                 await createWorkspace(newWorkspace);
                 await addCollaborators(collaborators,uuid);
-                router.refresh;
+                dispatch({
+                    type:"ADD_WORKSPACE",
+                    payload:{... newWorkspace,folders: [] }
+                })
+                toast({
+                    title: 'Workspace Created',
+                    description: `${newWorkspace.title} has been created successfully.`,
+                    action:(
+                        <ToastAction altText="Workspace created suxesfully">SUXES</ToastAction>
+                    )
+                })
+                router.refresh();
             }
+            setIsLoading(false);
+            setIsOpen(false);
         }
     }
 
@@ -116,11 +139,46 @@ const WorkspaceCreator = () => {
                 </SelectContent>
             </Select>
         </>
-        {permissions==="shared" && <div><CollaboratorSearch/></div>}
-        <Button type={"button"} disabled={!title || (permissions==="shared" && collaborators.length===0)}
+        {permissions==="shared" && 
+            <div>
+                <CollaboratorSearch getCollaborator={(user)=>{addCollaborator(user);}} existingCollaborators={collaborators}>
+                    <Button type='button' className='text-sm mt-4'>
+                        <Plus/>
+                        Add Collaborator
+                    </Button>
+                </CollaboratorSearch>
+                <div className='mt-4'>
+                    <span className='text-sm text-muted-foreground'>
+                        Collaborators {collaborators.length || ""}
+                    </span>
+                    <ScrollArea className='h-[120px] overflow-y-scroll w-full rounded-md border border-muted-foreground/20'>
+                        {collaborators.length>0 ? collaborators.map((collaborator)=>(<div className='p-4 flex justify-between items-center' key={collaborator.id}>
+                            <div className='flex gap-4 items-center'>
+                                <Avatar>
+                                    <AvatarImage src="/avatars/7.png"/>
+                                    <AvatarFallback>
+                                        PJ
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div className='text-sm gap-2 text-muted-foreground overflow-hidden overflow-ellipsis sm:w-[300px] w-[140px]'>
+                                    {collaborator.email}
+                                </div>
+                            </div>
+                            <Button variant={"secondary"} onClick={()=>removeCollaborator(collaborator)}>
+                                Remove
+                            </Button>
+                        </div>)) : (<div className='absolute right-0 left-0 top-o bottom-0 flex justify-center items-center'>
+                            <span className='text-muted-foreground text-sm'>you have no friends</span>
+                        </div>)}
+                    </ScrollArea>
+                </div>
+            </div>
+        }
+        <Button type={"button"} disabled={!title || (permissions==="shared" && collaborators.length===0) || isLoading}
             variant={"secondary"}
-            onClick={createItem}
-        >Create</Button>
+            onClick={createItem}>
+                Create
+        </Button>
     </div>
   )
 }

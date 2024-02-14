@@ -1,5 +1,7 @@
 'use client';
-
+//in general we want to have access to the current workspace, folder and file
+//throughout the app. we want to be able to dispatch events to update the global state
+//and we want to be able to listen to changes in the global state
 import React, {
   Dispatch,
   createContext,
@@ -25,6 +27,9 @@ interface AppState {
 //for some reason when e.g. we create a new workspace
 //we want to dispatch an event. so we call dispatch and 
 //pass inside the workspace that we created
+//the action is the event that we want to dispatch
+//the reason we want to dispatch an event is because we want to
+//update the global state with new data
 type Action =
   | { type: 'ADD_WORKSPACE'; payload: appWorkspacesType }
   | { type: 'DELETE_WORKSPACE'; payload: string }
@@ -79,12 +84,16 @@ type Action =
     };
 
 //set the initial state to an empty array of workspaces
+//this is the global state
 const initialState: AppState = { workspaces: [] };
 
 // this functions receives the changes. for example every time i 
 //dispatch a "CREATE_WORKSPACE" event accompanied by the payload 
 //with the instance of the workspace returned by supabase,
 //the appreducer listens for it and adds it to the global state
+
+//the appreducer is a function that takes the current state and the action
+//and returns the new state
 const appReducer = (
   state: AppState = initialState,
   action: Action
@@ -298,6 +307,7 @@ const appReducer = (
       return initialState;
   }
 };
+//in general, reduces take actions and reduce them to a new state
 
 const AppStateContext = createContext<
   | {
@@ -309,22 +319,30 @@ const AppStateContext = createContext<
     }
   | undefined
 >(undefined);
+//create a context for the global state
+//including the state, the dispatch function and the workspaceId, folderId and fileId
+
 
 interface AppStateProviderProps {
   children: React.ReactNode;
 }
 
 const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
-  const [state, dispatch] = useReducer(appReducer, initialState);
+  const [state, dispatch] = useReducer(appReducer, initialState); // the equivalent of useState but for complex states
+  //the appReducer is the reducer function which takes the current state and the action and returns the new state
+  //the intitial state is the initial state of the global state
   const pathname = usePathname();
+  //returns the current pathname of the URL
 
   const workspaceId = useMemo(() => {
-    const urlSegments = pathname?.split('/').filter(Boolean);
+    const urlSegments = pathname?.split('/').filter(Boolean);//split the pathname by / and remove any empty strings
     if (urlSegments)
       if (urlSegments.length > 1) {
-        return urlSegments[1];
+        return urlSegments[1];//return the second element of the array
       }
   }, [pathname]);
+  //the useMemo hook is used to memorize the value of the workspaceId
+  //between renders. It only changes when the pathname changes
 
   const folderId = useMemo(() => {
     const urlSegments = pathname?.split('/').filter(Boolean);
@@ -356,7 +374,7 @@ const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
       });
     };
     fetchFiles();
-  }, [folderId, workspaceId]);
+  }, [folderId, workspaceId]);//fetch the files when the folderId or the workspaceId changes
 
   useEffect(() => {
     console.log('App State Changed', state);
@@ -370,7 +388,9 @@ const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
     </AppStateContext.Provider>
   );
 };
-
+//in the workspace-dropdown.tsx we set the state to include
+// the shared, the collaboratin and the private workspaces using 
+// the SET_WORSKPACE action
 export default AppStateProvider;
 
 export const useAppState = () => {

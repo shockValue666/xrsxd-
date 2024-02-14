@@ -38,6 +38,7 @@ const WorkspaceDropdown:React.FC<WorkspaceDropdownProps> = ({
 
     const handleSelect = (option:workspace) => {
         setSelectedOption(option);
+        console.log("option: ",option)
         setIsOpen(false);
     } 
   return (
@@ -49,7 +50,7 @@ const WorkspaceDropdown:React.FC<WorkspaceDropdownProps> = ({
         </div>
         {
             isOpen && (
-                <div className='origin-top-right absolute w-full rounded-md shadow-md z-50 h-[190px] bg-black/10 backdrop:blur-lg group overflow-scroll border-[1px] border-muted'>
+                <div className='origin-top-right absolute w-full rounded-md shadow-md z-150 h-[190px] bg-black/10 backdrop:blur-lg group overflow-scroll border-[1px] border-muted'>
                     <div className='rounded-md flex flex-col'>
                         <div className='!p-2'>
                             {!!privateWorkspaces.length && <>
@@ -70,7 +71,7 @@ const WorkspaceDropdown:React.FC<WorkspaceDropdownProps> = ({
                                 {sharedWorkspaces.map((option)=><SelectedWorkspace key={option.id} workspace={option} onClick={handleSelect} />)}
                             </>}
                         </div>
-                        <CustomDialogTrigger header='Create a workspace' content={<WorkspaceCreator/>} description='lol you can change your workspace privacy cocks'>
+                        <CustomDialogTrigger header='Create a workspace' content={<WorkspaceCreator setIsOpen={setIsOpen}/>} description='lol you can change your workspace privacy cocks'>
                             <div className='
                             flex
                             transition-all

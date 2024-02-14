@@ -5,6 +5,11 @@ import { getCollaboratingWorkspaces, getFolders, getPrivateWorkspaces, getShared
 import { redirect } from 'next/navigation';
 import { twMerge } from 'tailwind-merge';
 import WorkspaceDropdown from './workspace-dropdown';
+import PlanUsage from './plan-usage';
+import NativeNavigation from './native-navigation';
+import { ScrollArea } from '../ui/scroll-area';
+import FoldersDropdownList from './folders-dropdown-list';
+import { useSupabaseUser } from '@/lib/providers/supabase-user-provider';
 
 interface SidebarPros{
     params:{workspaceId:string};
@@ -12,10 +17,12 @@ interface SidebarPros{
 }
 
 const Sidebar:React.FC<SidebarPros> = async ({params,className}) => {
+    // console.log("params from [workspaceId]",params)
     const supabase = createServerComponentClient({cookies})
 
     //check if there is a user
     const {data:{user}} = await supabase.auth.getUser()
+    // const {user} = useSupabaseUser();
     if(!user) return;
     //subscription status
     const {data:subscriptionData,error:subscriptionError} = await getUserSubscriptionStatus(user.id);
@@ -25,7 +32,6 @@ const Sidebar:React.FC<SidebarPros> = async ({params,className}) => {
     if(subscriptionError || folderError) redirect(`/dashboard`);
     const [privateWorkspaces,collaboratingWorkspaces,sharedWorkspaces] = 
         await Promise.all([getPrivateWorkspaces(user.id),getCollaboratingWorkspaces(user.id),getSharedWorkspaces(user.id)])
-
     //get all the different wokrspaces
   return (
     <aside className={twMerge(
@@ -35,6 +41,13 @@ const Sidebar:React.FC<SidebarPros> = async ({params,className}) => {
         <div>
             idk
             <WorkspaceDropdown defaultValue={[...privateWorkspaces,...collaboratingWorkspaces,...sharedWorkspaces].find(workspace=>workspace.id==params.workspaceId)} sharedWorkspaces={sharedWorkspaces} collaboratingWorkspaces={collaboratingWorkspaces} privateWorkspaces={privateWorkspaces}></WorkspaceDropdown>
+            <PlanUsage foldersLength={folderData?.length || 0} subscription={subscriptionData} />  
+            <NativeNavigation myWorkspaceId={params.workspaceId}></NativeNavigation>
+            <ScrollArea className='overflow-scroll relative h-[450px] '>
+                <div className='pointer-events-none w-full absolute bottom-0 h-20 bg-gradient-to-t from-background to-transparent z-40'>
+                </div>
+                <FoldersDropdownList workspaceFolders={folderData} workspaceId={params.workspaceId}/>
+            </ScrollArea>
         </div>
     </aside>
   )

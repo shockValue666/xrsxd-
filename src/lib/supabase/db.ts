@@ -14,7 +14,7 @@ if(!process.env.DATABASE_URL){
 }
 
 //postgres client setup
-const client = postgres(process.env.DATABASE_URL as string,{max:1});
+const client = postgres(process.env.DATABASE_URL as string,{max:1,prepare:false});
 //drizzle DB instance
 const db = drizzle(client,{schema});
 const migrateDb = async () =>{
