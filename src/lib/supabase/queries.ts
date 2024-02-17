@@ -5,6 +5,8 @@ import {Folder, Subscription, User, workspace} from './supabase.types'
 import {validate} from 'uuid'
 import {and, eq, ilike, notExists} from 'drizzle-orm'
 import { collaborators } from "./schema";
+import { File } from "./supabase.types";
+import { revalidatePath } from "next/cache";
 
 export const getUserSubscriptionStatus = async (userId:string) =>{
 
@@ -193,4 +195,48 @@ export const updateFolder = async (folder:Partial<Folder>,folderId:string) => {
     } catch (error) {
         return {data:null,error:`Error at updating the folder: ${error}`} 
     }
+}
+
+export const createFile = async (file:File) => {
+    try {
+        await db.insert(files).values(file)
+        return {data:null,error:null}
+    } catch (error) {
+        return {data:null, error:`Error at creating the file: ${error}`}
+    }
+}
+
+export const updateFile = async (file:Partial<File>,fileId:string) => {
+    try {
+        await db.update(files).set(file).where(eq(files.id,fileId))
+        return {data:null,error:null}
+    } catch (error) {
+        return {data:null,error:`error at updating the file: ${error}`}
+    }
+}
+
+export const updateWorkspace = async (workspace:Partial<workspace>,workspaceId:string) => {
+    if(!workspaceId) return {data:null,error:"Error, no workspace id"}
+    try {
+        await db.update(workspaces).set(workspace).where(eq(workspaces.id,workspaceId))
+        return {data:null,error:null}
+        revalidatePath(`/dashboard/${workspaceId}`); // it helps to revalidate the path
+        //revalidate the path means that the page will be revalidated and the data will be updated
+    } catch (error) {
+        return {data:null,error:`Error at updating the workspace: ${error}`}
+    }
+}
+
+export const removeCollaborators = async (users:User[],workspaceId:string) => {
+    const reponse = users.forEach(async (user:User)=> {
+        const userExists = await db.query.collaborators.findFirst({
+            where:(u,{eq})=> and(eq(u.userId,user.id),eq(u.workspaceId,workspaceId))
+        })
+        if(userExists) await db.delete(collaborators).where(and(eq(collaborators.workspaceId,workspaceId),eq(collaborators.userId,user.id)));        
+    })
+}
+
+
+export const deleteWorkspace = async (workspaceId:string) => {
+    await db.delete(workspaces).where(eq(workspaces.id,workspaceId))
 }
