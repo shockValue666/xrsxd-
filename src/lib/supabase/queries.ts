@@ -190,7 +190,8 @@ export const createFolder = async(folder:Folder) => {
 
 export const updateFolder = async (folder:Partial<Folder>,folderId:string) => {
     try {
-        await db.update(folders).set(folder).where(eq(folders.id,folderId))
+        const result = await db.update(folders).set(folder).where(eq(folders.id,folderId))
+        // console.log("from updating: the fucking folder: ",result)
         return {data:null,error:null}
     } catch (error) {
         return {data:null,error:`Error at updating the folder: ${error}`} 
@@ -239,4 +240,45 @@ export const removeCollaborators = async (users:User[],workspaceId:string) => {
 
 export const deleteWorkspace = async (workspaceId:string) => {
     await db.delete(workspaces).where(eq(workspaces.id,workspaceId))
+}
+
+export const getWorkspaceDetails = async(workspaceId:string) => {
+    const isValid = validate(workspaceId);
+    if(!isValid) return {data:[],error:"Error, invalid workspace id from uuid"}
+    try {
+        const result = await (db.select().from(workspaces).where(eq(workspaces.id,workspaceId)).limit(1)) as workspace[] | [];
+        return {data:result,error:null}
+    } catch (error) {
+        return {data:[],error:`Error at getting the workspace details: ${error}`}
+    }
+}
+
+export const getFolderDetails = async(folderId:string) => {
+    const isValid = validate(folderId);
+    if(!isValid) return {data:[],error:"Error, invalid file id from uuid"}
+    try {
+        const result = await (db.select().from(folders).where(eq(folders.id,folderId)).limit(1)) as Folder[] | [];
+        return {data:result,error:null}
+    } catch (error) {
+        return {data:[],error:`Error at getting the folder details: ${error}`}
+    }
+}
+
+export const getFileDetails = async(fileId:string) => {
+    const isValid = validate(fileId);
+    if(!isValid) return {data:[],error:"Error, invalid file id from uuid"}
+    try {
+        const result = await (db.select().from(files).where(eq(files.id,fileId)).limit(1)) as File[] | [];
+        return {data:result,error:null}
+    } catch (error) {
+        return {data:[],error:`Error at getting the file details: ${error}`}
+    }
+}
+
+export const deleteFile = async (fileId:string) => {
+    await db.delete(files).where(eq(files.id,fileId));
+}
+
+export const deleteFolder = async (folderId:string) => {
+    await db.delete(folders).where(eq(folders.id,folderId));
 }

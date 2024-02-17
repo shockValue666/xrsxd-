@@ -41,6 +41,13 @@ const WorkspaceDropdown:React.FC<WorkspaceDropdownProps> = ({
         console.log("option: ",option)
         setIsOpen(false);
     } 
+
+    useEffect(()=>{
+        const findSelectedWorkspace = state.workspaces.find(
+            (workspace)=>workspace.id===defaultValue?.id
+        )
+        if(findSelectedWorkspace) setSelectedOption(findSelectedWorkspace)
+    },[state,defaultValue])
   return (
     <div className='relative inline-block text-left'>
         <div>
@@ -50,7 +57,7 @@ const WorkspaceDropdown:React.FC<WorkspaceDropdownProps> = ({
         </div>
         {
             isOpen && (
-                <div className='origin-top-right absolute w-full rounded-md shadow-md z-150 h-[190px] bg-black/10 backdrop:blur-lg group overflow-scroll border-[1px] border-muted'>
+                <div className='origin-top-right absolute w-full rounded-md shadow-md z-50 h-[190px] bg-black/10 backdrop-blur-lg group overflow-scroll border-[1px] border-muted'>
                     <div className='rounded-md flex flex-col'>
                         <div className='!p-2'>
                             {!!privateWorkspaces.length && <>

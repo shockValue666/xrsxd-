@@ -1,8 +1,18 @@
-import React from 'react'
+export const dynamic = 'force-dynamic';
 
-const page = () => {
+import React from 'react'
+import QuillEditor from '@/components/quil-editor/quil-editor'
+import { redirect } from 'next/navigation'
+import { getFolderDetails } from '@/lib/supabase/queries'
+
+
+const page = async ({params}: {params: {folderId:string}}) => {
+  const {data,error} = await getFolderDetails(params.folderId);
+  if(error) redirect('/dashboard');
   return (
-    <div>folder</div>
+    <div className='relative'>
+      <QuillEditor dirType="folder" fileId={params.folderId} dirDetails={data[0] || {}}/>
+    </div>
   )
 }
 

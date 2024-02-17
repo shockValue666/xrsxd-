@@ -1,5 +1,5 @@
-import React, { ChangeEvent, useRef, useState } from 'react'
-
+"use client";
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react'
 import { useAppState } from '@/lib/providers/state-provider';
 import { User, workspace } from '@/lib/supabase/supabase.types';
 import { useSupabaseUser } from '@/lib/providers/supabase-user-provider';
@@ -63,7 +63,8 @@ const SettingsForm = () => {
 
     //onchange workspace title
     function workspaceNameChange(event: ChangeEvent<HTMLInputElement>): void {
-        if(!workspaceId || event.target.value === "") return;
+        // console.log("event: ",event.target.value)
+        if(!workspaceId || !event.target.value) return;
         dispatch({type:"UPDATE_WORKSPACE",payload:{workspace:{title:event.target.value},workspaceId}});
         if(titleTimerRef.current) clearTimeout(titleTimerRef.current);
         titleTimerRef.current = setTimeout(async () => {
@@ -104,6 +105,11 @@ const SettingsForm = () => {
     //get workspace details
     //get all the collaborators
     //WIP payment portal redirect
+
+    useEffect(()=>{
+        const showingWorkspace = state.workspaces.find((workspace) => workspace.id === workspaceId);
+        if(showingWorkspace) setWorkspaceDetails(showingWorkspace);
+    },[workspaceId,state])
   return (
     <div className='flex gap-4 flex-col'>
         <p className='flex items-center gap-2 mt-6'>
@@ -189,7 +195,13 @@ const SettingsForm = () => {
             <AlertDescription>
                 Warning! Deleting your workspace will permanently delete all data related to this workspace
             </AlertDescription>
-            <Button type={"submit"} size="sm" variant={'destructive'} className='mt-4 text-sm bg-destructive/40 border-2 border-destructive' onClick={async ()=> {if(workspaceId) await deleteWorkspace(workspaceId); toast({title:"suxes", description:"successfully deleted the workspace"});router.replace("/dashboard")} }>Delete Workspace</Button>
+            <Button type={"submit"} size="sm" variant={'destructive'} className='mt-4 text-sm bg-destructive/40 border-2 border-destructive' onClick={async ()=> {
+                if(!workspaceId) return;
+                if(workspaceId) await deleteWorkspace(workspaceId); 
+                toast({title:"suxes", description:"successfully deleted the workspace"});
+                dispatch({type:"DELETE_WORKSPACE",payload:workspaceId});
+                router.replace("/dashboard");
+            } }>Delete Workspace</Button>
         </Alert>
     </div>
   )
