@@ -4,8 +4,14 @@ import { File, Folder, workspace } from '@/lib/supabase/supabase.types';
 import React, { use, useCallback, useMemo, useState } from 'react'
 import "quill/dist/quill.snow.css"
 import { Button } from '../ui/button';
-import { deleteFile, deleteFolder, updateFile, updateFolder } from '@/lib/supabase/queries';
+import { deleteFile, deleteFolder, updateFile, updateFolder, updateWorkspace } from '@/lib/supabase/queries';
 import { usePathname } from 'next/navigation';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Badge } from '../ui/badge';
+import Image from 'next/image';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import EmojiPicker from '../global/emoji-picker';
 
 interface QuillEditorProps{
   dirType: "workspace" | "file" | "folder" ;
@@ -38,9 +44,12 @@ const QuillEditor:React.FC<QuillEditorProps> = ({
   dirType,
   fileId
 }) => {
+  const supabase = createClientComponentClient();
   const {state,workspaceId,folderId,dispatch} = useAppState();
   const [quill,setQuill] = useState<any>(null);
   const pathname = usePathname();
+  const [collaborators,setCollaborators] = useState<{id:string;email:string;avatarUrl:string}[]>([]);
+  const [saving,setSaving] = useState(false);
 
   const details = useMemo(()=>{
     let selectedDir;
@@ -137,6 +146,28 @@ const QuillEditor:React.FC<QuillEditorProps> = ({
         await deleteFolder(fileId)
       } 
   }
+  //onchange icon
+  const iconOnChange = async (icon:string) => {
+
+    console.log("onchange: ",icon)
+    if(!fileId) return;
+    if(dirType==="workspace"){
+      dispatch({
+        type:"UPDATE_WORKSPACE",
+        payload:{
+          workspace:{iconId:icon},
+          workspaceId:fileId
+        }
+      })
+      await updateWorkspace({iconId:icon},fileId)
+    }
+    if(dirType==="folder"){
+      
+    }
+    if(dirType==="file"){
+      
+    }
+  }
   return (
     <>
       <div className='relative'>
@@ -161,11 +192,60 @@ const QuillEditor:React.FC<QuillEditorProps> = ({
           <div>
             {breadCrumbs}
           </div>
+          <div className='flex items-center gap-4'>
+            <div className='flex items-center justify-center h-10'>
+              {
+                collaborators?.map((collaborator)=>(
+                    <TooltipProvider key={collaborator.id}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Avatar className='-ml-3 bg-background border-2 flex items-center justify-center border-white h-8 w-8 rounded-full'>
+                            <AvatarImage src={collaborator.avatarUrl ? collaborator.avatarUrl : "" } className='rounded-full'/>
+                            <AvatarFallback>{collaborator.email.substring(0,2).toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          User Name
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                ))
+              }
+
+            </div>
+            {
+              saving ? 
+              <Badge variant="secondary" className='bg-orange-600 top-4 text-white right-4 z-50'>
+                Saving...
+              </Badge>
+              :
+              <Badge variant={'secondary'} className='bg-emerald-600 top-4 text-white right-4 z-50' >
+                saved
+              </Badge>
+            }
+          </div>
         </div>
       </div>
+      {details.bannerUrl && <>
+        <div className='relative w-full h-[200px]'>
+          <Image src={
+              // supabase.storage.from('workspace-logos').getPublicUrl(details.bannerUrl).data.publicUrl
+              "/BannerImage.png"
+          } fill className='w-full md:h-40 h-20 object-cover' alt="Banner Image"/>
+        </div>
+      </>}
       <div className='flex justify-center items-center flex-col mt-2 relative'>
+        <div className='w-full self-center max-w-[800px] flex flex-col px-7 lg:my-8'>
+          <div className='text-[80px]'>
+            <EmojiPicker getValue={iconOnChange} >
+                <div className='w-[100px] cursor-pointer transition-colors h-[100px] flex items-center justify-center hover:bg-muted rounded-xl'>
+                  {details.iconId}
+                </div>
+            </EmojiPicker>
+          </div>
+        </div>
         <div id="container" ref={wrapperRef} className='max-w-[800px]'>
-          
+        
         </div>
       </div>
     </>

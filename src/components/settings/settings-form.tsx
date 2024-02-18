@@ -18,6 +18,7 @@ import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Alert, AlertDescription } from '../ui/alert';
+import EmojiPicker from '../global/emoji-picker';
 
 interface SettingsFormProps{
 
@@ -81,7 +82,7 @@ const SettingsForm = () => {
         setUploadingLogo(true);
         const {data,error} = await supabase.storage.from('workspace-logos').upload(`workspaceLogoFromMyCock.${uuid}`,file,{
             cacheControl:'3600',
-            upsert:true
+            // upsert:true
         });
 
         if(!error){
@@ -110,6 +111,8 @@ const SettingsForm = () => {
         const showingWorkspace = state.workspaces.find((workspace) => workspace.id === workspaceId);
         if(showingWorkspace) setWorkspaceDetails(showingWorkspace);
     },[workspaceId,state])
+
+    const [selectedEmoji,setSelectedEmoji] = useState("😈");
   return (
     <div className='flex gap-4 flex-col'>
         <p className='flex items-center gap-2 mt-6'>
@@ -124,6 +127,18 @@ const SettingsForm = () => {
             {/* WIP subscription */}
             <Input name="workspaceLogo" type="file" accept='image/*' placeholder='workspace logo' onChange={onChangeWorkspaceLogo} disabled={uploadingLogo} />
             {/* WIP subscriptions */}
+            <div className='flex justify-center items-center py-2 pt'>
+                <Label htmlFor='emoji' className='text-5xl text-muted-foreground' content='select an emoji'>
+                    <p className='absolute text-sm text-muted-foreground left-[5%]'>
+                        Emoji
+                    </p>
+                    <div className='' id="emoji">
+                        <EmojiPicker getValue={(emoji)=>{setSelectedEmoji(emoji)}} >
+                            {selectedEmoji}
+                        </EmojiPicker>
+                    </div>
+                </Label>
+              </div>
         </div>
         <>
             <Label htmlFor='permissions' className='text-sm text-muted-foreground'>Permissions</Label>

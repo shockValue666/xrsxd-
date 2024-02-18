@@ -33,7 +33,7 @@ const DashboardSetup:React.FC<DashboardSetupProps> = ({
 }) => {
   const {toast} = useToast()
   const router= useRouter();
-  const [selectedEmoji,setSelectedEmoji] = useState("poutsa");
+  const [selectedEmoji,setSelectedEmoji] = useState("🤑");
   const supabase = createClientComponentClient()
   const {register,handleSubmit,reset, formState:{isSubmitting:isLoading,errors}} = useForm<z.infer<typeof CreateWorkspaceFormSchema>>({
     mode:"onChange",
