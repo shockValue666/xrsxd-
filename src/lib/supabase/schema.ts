@@ -29,7 +29,7 @@ export const folders = pgTable("folders",{
     data:text('data'),
     inTrash:text("in_trash"),
     bannerUrl:text("banner_url"),
-    workspaceId:uuid("workspace_id").references(()=>workspaces.id,{onDelete:'cascade'}) // note to gpt-4: please explain to me the conscept of reference and the onDelete cascade
+    workspaceId:uuid("workspace_id").notNull().references(()=>workspaces.id,{onDelete:'cascade'}) // note to gpt-4: please explain to me the conscept of reference and the onDelete cascade
 });
 
 export const files = pgTable("files",{
@@ -43,8 +43,8 @@ export const files = pgTable("files",{
     data:text('data'),
     inTrash:text("in_trash"),
     bannerUrl:text("banner_url"),
-    workspaceId:uuid("workspace_id").references(()=>workspaces.id,{onDelete:'cascade'}), // note to gpt-4: please explain to me the conscept of reference and the onDelete cascade
-    folderId:uuid('folder_id').references(()=>folders.id,{onDelete:"cascade"}),
+    workspaceId:uuid("workspace_id").notNull().references(()=>workspaces.id,{onDelete:'cascade'}), // note to gpt-4: please explain to me the conscept of reference and the onDelete cascade
+    folderId:uuid('folder_id').notNull().references(()=>folders.id,{onDelete:"cascade"}),
 })
 
 export const subscriptions = pgTable("subscriptions", {

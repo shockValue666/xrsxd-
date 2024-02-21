@@ -378,7 +378,7 @@ const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
   //in order to make it more optimized
 
   useEffect(() => {
-    console.log('App State Changed', state);
+    // console.log('App State Changed', state);
   }, [state]);
 
   return (

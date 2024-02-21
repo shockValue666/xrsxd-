@@ -9,10 +9,12 @@ import { Briefcase,Lock, Plus, Share } from 'lucide-react';
 import { Separator } from '@radix-ui/react-select';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
-import { addCollaborators, deleteWorkspace, removeCollaborators, updateWorkspace } from '@/lib/supabase/queries';
+import { addCollaborators, deleteWorkspace, getCollaborators, removeCollaborators, updateWorkspace } from '@/lib/supabase/queries';
 import { v4 } from 'uuid';
 import { useToast } from '../ui/use-toast';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import {AlertDialog,AlertDialogAction,AlertDialogCancel,AlertDialogContent,AlertDialogDescription,AlertDialogFooter,AlertDialogHeader,AlertDialogTitle,AlertDialogTrigger,} from "@/components/ui/alert-dialog"
+  
 import CollaboratorSearch from '../global/collaborator-search';
 import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
@@ -27,7 +29,7 @@ interface SettingsFormProps{
 const SettingsForm = () => {
     const {toast} = useToast();
     const {state,workspaceId,dispatch} = useAppState();
-    const [permissions,setPermissions] = useState("Private");
+    const [permissions,setPermissions] = useState("private");
     const [collaborators,setCollaborators] = useState<User[] | []>([]);
     const {user} = useSupabaseUser();
     const router = useRouter();
@@ -46,9 +48,8 @@ const SettingsForm = () => {
     const addCollaborator = async (user:User) => {
         if(!workspaceId) return;
         //WIP subscription
-        await addCollaborators(collaborators,workspaceId);
+        await addCollaborators([user],workspaceId);
         setCollaborators([...collaborators,user]);
-        router.refresh();
     }
 
     //remove collaborators
@@ -74,6 +75,7 @@ const SettingsForm = () => {
 
     }
 
+    //onchange workspace logo or banner or w/e
     const onChangeWorkspaceLogo = async (event: ChangeEvent<HTMLInputElement>) => {
         if(!workspaceId) return;
         const file = event.target.files?.[0];
@@ -99,12 +101,33 @@ const SettingsForm = () => {
         }
     }
     //all onchanges
+    const onPermissionChange = (value:string) => {
+        if(value==="private"){
+            setOpenAlertMessage(true);
+        }else{
+            setPermissions(value);
+        }
+    }
 
     //onclicks
 
     //fetching avatar details
+    // useEffect(()=>{
+    //     if(!workspaceId) return;
+    // },[workspaceId])
     //get workspace details
     //get all the collaborators
+    useEffect(()=>{
+        if(!workspaceId) return;
+        const fetchCollaborators = async () => {
+            const response = await getCollaborators(workspaceId);
+            if(response.length){
+                setPermissions("shared");
+                setCollaborators(response);
+            }
+        }
+        fetchCollaborators()
+    },[workspaceId])
     //WIP payment portal redirect
 
     useEffect(()=>{
@@ -113,8 +136,21 @@ const SettingsForm = () => {
     },[workspaceId,state])
 
     const [selectedEmoji,setSelectedEmoji] = useState("😈");
+
+    //alert dialog confirm
+    const onClickAlertConfirm = async () => {
+        //shouldn't we check if the user trying to change the workspace to private is the owner of the workspace?
+        //if not, we should throw an error
+        if(!workspaceId) return;
+        if(collaborators.length>0){
+            await removeCollaborators(collaborators,workspaceId);
+        }
+        setPermissions("private");
+        setOpenAlertMessage(false);
+    }
   return (
     <div className='flex gap-4 flex-col'>
+        <>
         <p className='flex items-center gap-2 mt-6'>
             <Briefcase size={24}/>
             Workspace
@@ -142,7 +178,7 @@ const SettingsForm = () => {
         </div>
         <>
             <Label htmlFor='permissions' className='text-sm text-muted-foreground'>Permissions</Label>
-            <Select onValueChange={(val)=>{setPermissions(val)}} defaultValue={permissions}>
+            <Select onValueChange={onPermissionChange} value={permissions}>
                 <SelectTrigger className='w-full h-26 -mt-3'>
                     <SelectValue/>
                 </SelectTrigger>
@@ -216,8 +252,31 @@ const SettingsForm = () => {
                 toast({title:"suxes", description:"successfully deleted the workspace"});
                 dispatch({type:"DELETE_WORKSPACE",payload:workspaceId});
                 router.replace("/dashboard");
-            } }>Delete Workspace</Button>
+            } }>
+                Delete Workspace
+            </Button>
         </Alert>
+        </>
+        <AlertDialog open={openAlertMessage}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>
+                        Are you sure you want to delete the workspace?
+                    </AlertDialogTitle>
+                    <AlertDescription>
+                        Changin a shared workspace to private will remove all the collaborators
+                    </AlertDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel onClick={()=>{setOpenAlertMessage(false)}}>
+                        Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction onClick={onClickAlertConfirm}>
+                        Continue
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     </div>
   )
 }

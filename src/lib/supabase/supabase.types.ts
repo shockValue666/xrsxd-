@@ -9,9 +9,71 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
+      cocksuckers: {
+        Row: {
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cocksuckers_user_id_users_id_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      collaborators: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collaborators_user_id_users_id_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collaborators_workspace_id_workspaces_id_fk"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       customers: {
         Row: {
           id: string
@@ -38,36 +100,36 @@ export interface Database {
       files: {
         Row: {
           banner_url: string | null
-          created_at: string | null
+          created_at: string
           data: string | null
-          folder_id: string | null
+          folder_id: string
           icon_id: string
           id: string
           in_trash: string | null
           title: string
-          workspace_id: string | null
+          workspace_id: string
         }
         Insert: {
           banner_url?: string | null
-          created_at?: string | null
+          created_at?: string
           data?: string | null
-          folder_id?: string | null
+          folder_id: string
           icon_id: string
           id?: string
           in_trash?: string | null
           title: string
-          workspace_id?: string | null
+          workspace_id: string
         }
         Update: {
           banner_url?: string | null
-          created_at?: string | null
+          created_at?: string
           data?: string | null
-          folder_id?: string | null
+          folder_id?: string
           icon_id?: string
           id?: string
           in_trash?: string | null
           title?: string
-          workspace_id?: string | null
+          workspace_id?: string
         }
         Relationships: [
           {
@@ -89,33 +151,33 @@ export interface Database {
       folders: {
         Row: {
           banner_url: string | null
-          created_at: string | null
+          created_at: string
           data: string | null
           icon_id: string
           id: string
           in_trash: string | null
           title: string
-          workspace_id: string | null
+          workspace_id: string
         }
         Insert: {
           banner_url?: string | null
-          created_at?: string | null
+          created_at?: string
           data?: string | null
           icon_id: string
           id?: string
           in_trash?: string | null
           title: string
-          workspace_id?: string | null
+          workspace_id: string
         }
         Update: {
           banner_url?: string | null
-          created_at?: string | null
+          created_at?: string
           data?: string | null
           icon_id?: string
           id?: string
           in_trash?: string | null
           title?: string
-          workspace_id?: string | null
+          workspace_id?: string
         }
         Relationships: [
           {
@@ -265,6 +327,13 @@ export interface Database {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "subscriptions_price_id_prices_id_fk"
+            columns: ["price_id"]
+            isOneToOne: false
+            referencedRelation: "prices"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "subscriptions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -314,7 +383,7 @@ export interface Database {
       workspaces: {
         Row: {
           banner_url: string | null
-          created_at: string | null
+          created_at: string
           data: string | null
           icon_id: string
           id: string
@@ -325,7 +394,7 @@ export interface Database {
         }
         Insert: {
           banner_url?: string | null
-          created_at?: string | null
+          created_at?: string
           data?: string | null
           icon_id: string
           id?: string
@@ -336,7 +405,7 @@ export interface Database {
         }
         Update: {
           banner_url?: string | null
-          created_at?: string | null
+          created_at?: string
           data?: string | null
           icon_id?: string
           id?: string

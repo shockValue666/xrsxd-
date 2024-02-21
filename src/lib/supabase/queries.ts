@@ -102,7 +102,8 @@ export const  getPrivateWorkspaces = async (userId:string) => {
         iconId:workspaces.iconId,
         data:workspaces.data,
         inTrash:workspaces.inTrash,
-        logo:workspaces.logo
+        logo:workspaces.logo,
+        bannerUrl:workspaces.bannerUrl
     })
     .from(workspaces)
     .where(
@@ -129,7 +130,8 @@ export const getCollaboratingWorkspaces = async (userId:string) => {
         iconId:workspaces.iconId,
         data:workspaces.data,
         inTrash:workspaces.inTrash,
-        logo:workspaces.logo
+        logo:workspaces.logo,
+        bannerUrl:workspaces.bannerUrl
     })
         .from(users)
         .innerJoin(collaborators,eq(users.id,collaborators.userId))
@@ -281,4 +283,18 @@ export const deleteFile = async (fileId:string) => {
 
 export const deleteFolder = async (folderId:string) => {
     await db.delete(folders).where(eq(folders.id,folderId));
+}
+
+
+export const getCollaborators = async (workspaceId:string) => {
+    const response = await db.select().from(collaborators).where(eq(collaborators.workspaceId,workspaceId));
+    if(!response.length) return []
+    const userInformation:Promise<User | undefined>[] = response.map(async (user) => {
+        const exists = db.query.users.findFirst({
+            where:(u,{eq})=> eq(u.id,user.userId)
+        })
+        return exists;
+    })
+    const resolvedUsers = await Promise.all(userInformation);
+    return resolvedUsers.filter(Boolean) as User[];
 }
