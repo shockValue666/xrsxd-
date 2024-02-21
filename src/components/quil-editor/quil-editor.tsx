@@ -406,15 +406,15 @@ const QuillEditor:React.FC<QuillEditorProps> = ({
       return
     };
     const socketHandler = (deltas: any, id: string) => {
-      console.log("deltas: ",deltas, " id: ",id, " fileId: ",fileId)
+      // console.log("deltas: ",deltas, " id: ",id, " fileId: ",fileId)
       if (id === fileId) {
         console.log("deltas: ",deltas) 
         quill.updateContents(deltas);
       }
     };
-    socket.on('receive-change', socketHandler);
+    socket.on('receive-changes', socketHandler);
     return () => {
-      socket.off('receive-change', socketHandler);
+      socket.off('receive-changes', socketHandler);
     };
   }, [quill, socket, fileId]);
   return (
