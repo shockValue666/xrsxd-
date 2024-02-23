@@ -10,6 +10,8 @@ import AppStateProvider from '@/lib/providers/state-provider';
 import { SupabaseUserProvider } from '@/lib/providers/supabase-user-provider';
 import { SocketProvider } from '@/lib/providers/socket-provider';
 import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from '@vercel/speed-insights/next';
+
 
 
 // const inter = Inter({ subsets: ['latin'] })
@@ -34,6 +36,7 @@ export default function RootLayout({
               <SocketProvider>
                  {children}
                  <Analytics/>
+                 <SpeedInsights />
               </SocketProvider>
             </SupabaseUserProvider>
           </AppStateProvider>
