@@ -9,6 +9,8 @@ import { twMerge } from 'tailwind-merge';
 import AppStateProvider from '@/lib/providers/state-provider';
 import { SupabaseUserProvider } from '@/lib/providers/supabase-user-provider';
 import { SocketProvider } from '@/lib/providers/socket-provider';
+import { Analytics } from "@vercel/analytics/react"
+
 
 // const inter = Inter({ subsets: ['latin'] })
 const inter = DM_Sans({ subsets: ['latin'] })
@@ -31,6 +33,7 @@ export default function RootLayout({
             <SupabaseUserProvider>
               <SocketProvider>
                  {children}
+                 <Analytics/>
               </SocketProvider>
             </SupabaseUserProvider>
           </AppStateProvider>

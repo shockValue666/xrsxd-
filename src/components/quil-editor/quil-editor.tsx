@@ -59,6 +59,7 @@ const QuillEditor:React.FC<QuillEditorProps> = ({
   const router = useRouter();
   const {user} = useSupabaseUser();
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const [localCursors,setLocalCursors] = useState<any[]>([]);
 
 
   const details = useMemo(()=>{
@@ -96,22 +97,25 @@ const QuillEditor:React.FC<QuillEditorProps> = ({
       const editor = document.createElement('div');
       wrapper.append(editor);
       const Quill = (await import('quill')).default;
-      //WIP cursors
-      const q = new Quill(editor,{
-        theme:"snow",
-        modules:{
-          toolbar:TOOLBAR_OPTIONS,
-          //WIP cursors
-        }
-      })
+      const QuillCursors = (await import('quill-cursors')).default;
+      Quill.register('modules/cursors', QuillCursors as any); //idk why i had to use as any
+      const q = new Quill(editor, {
+        theme: 'snow',
+        modules: {
+          toolbar: TOOLBAR_OPTIONS,
+          cursors: {
+            transformOnTextChange: true,
+          },
+        },
+      });
       setQuill(q);
-      console.log("quill has been set and now the useEffect of fetchinformation should run. q is: ",q, " quill is: ", quill)
+      // console.log("quill has been set and now the useEffect of fetchinformation should run. q is: ",q, " quill is: ", quill)
     }
   },[])
 
-  useEffect(()=>{
-    console.log("quill has changed state: ",quill)
-  },[quill])
+  // useEffect(()=>{
+  //   console.log("quill has changed state: ",quill)
+  // },[quill])
 
   //breadCrumbs
   const breadCrumbs = useMemo(()=>{
@@ -120,7 +124,7 @@ const QuillEditor:React.FC<QuillEditorProps> = ({
     const workspaceDetails = state.workspaces.find(workspace=>workspace.id===workspaceId)
     // console.log("workspace Det details: ",workspaceDetails)
     const workspaceBreadCrumb = workspaceDetails ? `${workspaceDetails.iconId} ${workspaceDetails.title}` : "";
-    console.log("workspacedetails.iconid: ",workspaceDetails?.iconId)
+    // console.log("workspacedetails.iconid: ",workspaceDetails?.iconId)
     if(segments.length === 1) return workspaceBreadCrumb
     
     const folderSegment = segments[1];
@@ -253,7 +257,7 @@ const QuillEditor:React.FC<QuillEditorProps> = ({
 
   //refresh the cache 
   useEffect(() => {
-    console.log("runninggggggg")
+    // console.log("runninggggggg")
     if (!fileId) {
       return;
     };
@@ -271,7 +275,7 @@ const QuillEditor:React.FC<QuillEditorProps> = ({
           return router.replace(`/dashboard/${workspaceId}`);
         }
         if (!workspaceId || quill === null) {
-          console.log("workspaceId is null or quill is null widdddd: ", workspaceId, " qqquuuiiilll: ",quill )
+          // console.log("workspaceId is null or quill is null widdddd: ", workspaceId, " qqquuuiiilll: ",quill )
           return
         };
         if (!selectedDir[0].data) {
@@ -400,7 +404,7 @@ const QuillEditor:React.FC<QuillEditorProps> = ({
   },[quill,socket,fileId,user,details,folderId,workspaceId,dispatch])
 
   useEffect(() => {
-    console.log("does this even run?")
+    // console.log("does this even run?")
     if (quill === null || socket === null) {
       console.log("quill or socket is null: ",quill,socket)
       return
@@ -417,6 +421,34 @@ const QuillEditor:React.FC<QuillEditorProps> = ({
       socket.off('receive-changes', socketHandler);
     };
   }, [quill, socket, fileId]);
+
+  //avatars
+  useEffect(()=>{
+    if(!fileId || quill===null) return;
+    const room = supabase.channel(fileId)
+    const subscription = room.on("presence",{event:"sync"},()=>{
+      const newState = room.presenceState();
+      const newCollaborators = Object.values(newState).flat() as any;
+      setCollaborators(newCollaborators);
+      if(user){
+        const allCursors: any = []
+        newCollaborators.forEach((collaborator:{id:string;email:string;avatar:string})=>{
+          if(collaborator.id !== user.id){
+            const userCursor = quill.getModule("cursors").createCursor(collaborator.id,collaborator.email.split('@')[0],`#${Math.random().toString(16).slice(2,8)}`)
+            allCursors.push(userCursor)
+          }
+        })
+        setLocalCursors(allCursors)
+      }
+    }).subscribe(async (status)=>{
+      if(status!=="SUBSCRIBED" || !user) return;
+      room.track({
+        id:user.id,
+        email:user.email?.split('@')[0],
+        avatarUrl:user.user_metadata?.avatar_url
+      })
+    })
+  },[fileId,quill,supabase])
   return (
     <>
     {/* {isConnected ? "connected" : "not connected"} */}
