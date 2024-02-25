@@ -5,11 +5,11 @@ import { User, workspace } from '@/lib/supabase/supabase.types';
 import { useSupabaseUser } from '@/lib/providers/supabase-user-provider';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Briefcase,Lock, Plus, Share } from 'lucide-react';
+import { Briefcase,CreditCard,ExternalLink,Lock, LogOut, Plus, Share, User as UserIcon } from 'lucide-react';
 import { Separator } from '@radix-ui/react-select';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
-import { addCollaborators, deleteWorkspace, getCollaborators, removeCollaborators, updateWorkspace } from '@/lib/supabase/queries';
+import { addCollaborators, deleteWorkspace, getCollaborators, getUsersFromSearch, removeCollaborators, updateWorkspace } from '@/lib/supabase/queries';
 import { v4 } from 'uuid';
 import { useToast } from '../ui/use-toast';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
@@ -21,6 +21,11 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Alert, AlertDescription } from '../ui/alert';
 import EmojiPicker from '../global/emoji-picker';
+import CypressProfileIcon from '../icons/cypressProfileIcon';
+import LogoutButton from '../global/logout-button';
+import Link from 'next/link';
+import { useSubscriptionModal } from '@/lib/providers/subscription-modal-provider';
+import { postData } from '@/lib/utils';
 
 interface SettingsFormProps{
 
@@ -31,7 +36,7 @@ const SettingsForm = () => {
     const {state,workspaceId,dispatch} = useAppState();
     const [permissions,setPermissions] = useState("private");
     const [collaborators,setCollaborators] = useState<User[] | []>([]);
-    const {user} = useSupabaseUser();
+    const {user,subscription} = useSupabaseUser();
     const router = useRouter();
     const supabase = createClientComponentClient();
     const [openAlertMessage,setOpenAlertMessage] = useState(false);
@@ -39,15 +44,32 @@ const SettingsForm = () => {
     const titleTimerRef=useRef<ReturnType<typeof setTimeout>>();
     const [uploadingProfilePic,setUploadingProfilePic] = useState(false);
     const [uploadingLogo,setUploadingLogo] = useState(false);
+    const {setOpen,open} = useSubscriptionModal()
+    const [loadingPortal, setLoadingPortal] = useState(false);
     
 
     //WIP Payment Portal
+    const redirectToCustomerPortal = async () => {
+        setLoadingPortal(true);
+        try {
+            const {url,error} = await postData({url:'/api/create-portal-link'});
+            window.location.assign(url);
+        } catch (error) {
+            console.log("error: ",error)
+            setLoadingPortal(false)
+        }
+        setLoadingPortal(false);
+    }
 
 
     //add collaborators
     const addCollaborator = async (user:User) => {
         if(!workspaceId) return;
         //WIP subscription
+        if(subscription?.status !== "active" && collaborators.length>=2){
+            setOpen(true);
+            return;
+        }
         await addCollaborators([user],workspaceId);
         setCollaborators([...collaborators,user]);
     }
@@ -148,6 +170,19 @@ const SettingsForm = () => {
         setPermissions("private");
         setOpenAlertMessage(false);
     }
+
+    //change profile pic
+    const onChangeProfilePicture = async (event: ChangeEvent<HTMLInputElement>) => {
+        if(!user?.email) return;
+        // const user = await getUsersFromSearch({email:user?.email});
+        const us = await getUsersFromSearch(user?.email);
+        const {data,error} = await supabase.storage.from('avatars').upload(`${user?.id}.png`,event.target.files?.[0] as File,{upsert:true});
+        if(data){
+            toast({title:"success",description:"profile picture updated"});
+        }else if(error){
+            toast({variant:"destructive",title:"error",description:"error at updating the profile picture"});
+        }
+    }
   return (
     <div className='flex gap-4 flex-col'>
         <>
@@ -161,8 +196,8 @@ const SettingsForm = () => {
             <Input name='workspaceName' value={workspaceDetails ? workspaceDetails.title : ""} placeholder='Workspace Name' onChange={workspaceNameChange}/>
             <Label htmlFor='workspaceLogo' className='text-sm text-muted-foreground'>Logo</Label>
             {/* WIP subscription */}
-            <Input name="workspaceLogo" type="file" accept='image/*' placeholder='workspace logo' onChange={onChangeWorkspaceLogo} disabled={uploadingLogo} />
-            {/* WIP subscriptions */}
+            <Input name="workspaceLogo" type="file" accept='image/*' placeholder='workspace logo' onChange={onChangeWorkspaceLogo} disabled={uploadingLogo || subscription?.status !== "active"} />
+            {subscription?.status !== "active" && <small className='text-muted-foreground'>to customize your workspace, you need to be on a pro plan user</small>}
             <div className='flex justify-center items-center py-2 pt'>
                 <Label htmlFor='emoji' className='text-5xl text-muted-foreground' content='select an emoji'>
                     <p className='absolute text-sm text-muted-foreground left-[5%]'>
@@ -256,6 +291,53 @@ const SettingsForm = () => {
                 Delete Workspace
             </Button>
         </Alert>
+        <p className='flex items-center gap-2 mt-6'>
+            <UserIcon size={24}/> idk why i used profile lol
+        </p>
+        <Separator/>
+        <div className='flex items-center'>
+            <Avatar>
+                <AvatarImage src="/avatars/7.png"/>
+                <AvatarFallback>
+                    <CypressProfileIcon/>
+                </AvatarFallback>
+            </Avatar>
+            <div className='flex flex-col ml-6'>
+                <small className='text-muted-foreground cursor-not-allowed'>
+                    {user ? user.email : "loading..."}
+                </small>
+                <Label htmlFor='profilePic' className='text-sm text-muted-foreground'>Profile Picture</Label>
+                <Input name="profilePic" type="file"  accept="image/*" placeholder='Profile Picture' onChange={onChangeProfilePicture} disabled={uploadingProfilePic}/>
+            </div>
+        </div>
+        <LogoutButton>
+            <div className='flex items-center'>
+                <LogOut/>
+            </div>
+        </LogoutButton>
+        <p className='flex items-center gap-2 mt-6'>
+            <CreditCard size={20}/> Billing & Plan
+        </p>
+        <Separator/>
+        <p className='text-muted-foreground '>
+            You are currently on a {''} {subscription?.status === "active" ? "Pro" : "Free"} plan
+        </p>
+        <Link href={"/"} target="_blank" className='text-muted-foreground flex flex-row items-center gap-2'>
+            View Plans <ExternalLink size={20}/>
+            {/* WIP redirect directly to the plan section of the front page using some kind of attributes that i currently don't remember */}
+        </Link>
+        {subscription?.status === "active" ? <div>
+            <Button className='text-sm' type="button" variant={'secondary'} size={'sm'} onClick={redirectToCustomerPortal} disabled={loadingPortal}>
+                Manage Subscriptions
+            </Button>
+        </div>
+        :
+        <div>
+            <Button variant={'secondary'} type="button" size={"sm"} className='text-sm' onClick={()=>setOpen(true)} >
+                Start Plan
+            </Button>
+        </div>
+        }
         </>
         <AlertDialog open={openAlertMessage}>
             <AlertDialogContent>

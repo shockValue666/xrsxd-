@@ -38,8 +38,9 @@ export async function actionLoginUser({email,password}:z.infer<typeof FormSchema
 
 export async function actionSignUpUser({email,password}:z.infer<typeof FormSchema>){
     const supabase = createRouteHandlerClient({cookies})
-    const {data} = await supabase.from("profiles").select("*").eq("email",email);
-    // console.log("actionSignUpUser DDDAAATTTAAA: ",data)
+    // const {data} = await supabase.from("profiles").select("*").eq("email",email);
+    const {data} = await supabase.from("users").select("*").eq("email",email);
+    console.log("data from profiles obviously doesn't exist so i gotta use users: ",data)
     if(data?.length){
         return {
             error: {
@@ -55,6 +56,15 @@ export async function actionSignUpUser({email,password}:z.infer<typeof FormSchem
             emailRedirectTo:`${process.env.NEXT_PUBLIC_SITE_URL}api/auth/callback`
         }
     })
+    // if(response.data && !response.error){
+    //     const {data:insertData,error:insertErrro} = await supabase.from("users").insert({
+    //         id:response.data.user?.id,
+    //         email:response.data.user?.email
+    //     })
+    //     if(insertErrro){
+    //         console.log("error at adding to the public users after authentication: ",insertErrro)
+    //     }
+    // }
     return response;
 }
 // response:  {

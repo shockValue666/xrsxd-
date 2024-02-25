@@ -1,6 +1,6 @@
 import { boolean, integer, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
-import { prices, subscriptionStatus, users } from "../../../migrations/schema";
-import { sql } from "drizzle-orm";
+import { prices, products, subscriptionStatus, users } from "../../../migrations/schema";
+import { relations, sql } from "drizzle-orm";
 
 export const workspaces = pgTable("workspaces",{
     id:uuid('id').defaultRandom().primaryKey().notNull(),
@@ -107,5 +107,15 @@ export const cocksuckers = pgTable("cocksuckers", {
     userId: uuid('user_id').notNull().references(()=>users.id,{onDelete:"cascade"})
 })
 
+export const productsRelations = relations(products, ({ many }) => ({
+    prices: many(prices),
+  }));
+  
+  export const pricesRelations = relations(prices, ({ one }) => ({
+    product: one(products, {
+      fields: [prices.productId],
+      references: [products.id],
+    }),
+  }));
 
 export {};

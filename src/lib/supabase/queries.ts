@@ -298,3 +298,28 @@ export const getCollaborators = async (workspaceId:string) => {
     const resolvedUsers = await Promise.all(userInformation);
     return resolvedUsers.filter(Boolean) as User[];
 }
+
+export const findUser = async (userId:string) => {
+    const response = await db.query.users.findFirst({where:(user,{eq})=> eq(user.id,userId)}) 
+    return response;
+}
+
+
+
+export const getActiveProductsWithPrice = async () => {
+    try {
+        const res = await db.query.products.findMany({
+            where:(prod,{eq})=>eq(prod.active,true),
+            with:{
+                prices:{
+                    where:(pri,{eq})=>eq(pri.active,true)
+                }
+            }
+        })
+        if(res.length) return {data:res,error:null}
+        return {data:[],error:null}
+    } catch (error) {
+        console.log(`Error at getting active products with price: ${error}`);
+        return {data:null,error:`Error at getting active products with price: ${error}`}
+    }
+}

@@ -10,6 +10,8 @@ import { createFolder } from '@/lib/supabase/queries';
 import { useToast } from '../ui/use-toast';
 import { Accordion } from '../ui/accordion';
 import Dropdown from './Dropdown';
+import useSupabaseRealtime from '@/lib/hooks/useSupabaseRealtime';
+import { useSubscriptionModal } from '@/lib/providers/subscription-modal-provider';
 
 interface FoldersDropdownListProps{
     workspaceFolders:Folder[] | null;
@@ -19,10 +21,12 @@ interface FoldersDropdownListProps{
 const FoldersDropdownList:React.FC<FoldersDropdownListProps> = ({workspaceFolders,workspaceId}) => {
     //WIP local state folders 
     //WIP setup real time updates (when another user creates a folder we want to see it)
+    useSupabaseRealtime();
     const {state,dispatch, folderId} = useAppState(); 
     const [folders,setFolders] = React.useState<Folder[]>(workspaceFolders || []);
     const {subscription} = useSupabaseUser();
     const {toast} = useToast();
+    const {setOpen,open} = useSubscriptionModal();
 
     //effect set initial state server app state
     useEffect(()=>{
@@ -39,9 +43,11 @@ const FoldersDropdownList:React.FC<FoldersDropdownListProps> = ({workspaceFolder
     //add folder 
     const addFolderHandler = async () => {
         //subscription modal
-        // if(folders.length>=3 && !subscription){
-
-        // }
+        if(folders.length>=3 && !subscription){
+            console.log("greater than my cock")
+            setOpen(true);
+            return;
+        }   
         const newFolder:Folder = {
             data:null,
             id:v4(),

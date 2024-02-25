@@ -4,7 +4,7 @@ import { File, Folder, workspace } from '@/lib/supabase/supabase.types';
 import React, { use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import "quill/dist/quill.snow.css"
 import { Button } from '../ui/button';
-import { deleteFile, deleteFolder, getFileDetails, getFolderDetails, getWorkspaceDetails, updateFile, updateFolder, updateWorkspace } from '@/lib/supabase/queries';
+import { deleteFile, deleteFolder, findUser, getFileDetails, getFolderDetails, getWorkspaceDetails, updateFile, updateFolder, updateWorkspace } from '@/lib/supabase/queries';
 import { usePathname, useRouter } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -144,12 +144,14 @@ const QuillEditor:React.FC<QuillEditorProps> = ({
       if(!folderId) return;
       dispatch({type:"UPDATE_FILE",payload:{file: {inTrash:""},fileId,workspaceId,folderId}})
       await updateFile({inTrash:""},fileId)
+      console.log("restored the file")
     }
     if(dirType==="folder"){
       if(!workspaceId) return;
       dispatch({type:"UPDATE_FOLDER",payload:{folder:{inTrash:""},folderId:fileId,workspaceId}})
       // console.log("i will fuck the world")
       await updateFolder({inTrash:""},fileId)
+      console.log('restored the file')
     }
   }
 
@@ -158,11 +160,13 @@ const QuillEditor:React.FC<QuillEditorProps> = ({
         if(!folderId) return;
         dispatch({type:"DELETE_FILE",payload:{fileId,workspaceId,folderId}})
         await deleteFile(fileId);
+        router.replace(`/dashboard/${workspaceId}`)
       }
       if(dirType==="folder"){
         if(!workspaceId) return;
         dispatch({type:"DELETE_FOLDER",payload:{folderId:fileId,workspaceId}})
         await deleteFolder(fileId)
+        router.replace(`/dashboard/${folderId}`)
       } 
   }
   //onchange icon
@@ -341,11 +345,17 @@ const QuillEditor:React.FC<QuillEditorProps> = ({
     socket.emit('create-room', fileId);
   }, [socket, quill, fileId]);
 
-  //send change to all clients
+  //send/emit change to all clients
   useEffect(()=>{
     if(quill===null || socket===null || !fileId || !user) return
     //WIP cursors
-    const selectionChangeHandler = () => {}
+    const selectionChangeHandler = (cursorId:string) => {
+      return (range:any,oldRange:any,source:any) => {
+        if(source === 'user' && cursorId){
+          socket.emit("send-cursor-move",range,fileId,cursorId);
+        }
+      }
+    }//fires when we click on the canvas or when we select anything
     const quillHandler = (delta:any,oldDelta:any,source:any) => {
       if(source !== "user") return;
       if(saveTimerRef.current) clearTimeout(saveTimerRef.current);
@@ -395,13 +405,31 @@ const QuillEditor:React.FC<QuillEditorProps> = ({
       socket.emit("send-changes",delta,fileId)
     }
     quill.on("text-change",quillHandler);
-    //WIP cursor, we are gonna use a selection handler
+    quill.on("selection-change",selectionChangeHandler(user.id))
     return () => {
       quill.off("text-change",quillHandler)
+      quill.off("selection-change",selectionChangeHandler)
       //WIP cursors
       if(saveTimerRef.current) clearTimeout(saveTimerRef.current);
     }
   },[quill,socket,fileId,user,details,folderId,workspaceId,dispatch])
+  //listen to the changes
+  useEffect(()=>{
+    if(quill===null || socket===null || !fileId || !localCursors.length) return;
+    const socketHandler = (range:any,roomId:string,cursorId:string) => {
+      if(roomId === fileId){
+        const cursorToMove = localCursors.find((cursor:any)=>cursor.cursors()?.[0].id === cursorId);
+        if(cursorToMove){
+          cursorToMove.moveCursor(cursorId,range);
+        }
+      }
+    }
+    socket.on('receive-action-move',socketHandler);
+    return () => {
+      socket.off('receive-action-move',socketHandler)
+    }
+  },[quill,socket,fileId,localCursors])
+
 
   useEffect(() => {
     // console.log("does this even run?")
@@ -442,13 +470,18 @@ const QuillEditor:React.FC<QuillEditorProps> = ({
       }
     }).subscribe(async (status)=>{
       if(status!=="SUBSCRIBED" || !user) return;
+      const response = await findUser(user.id)
+      if(!response) return;
       room.track({
         id:user.id,
         email:user.email?.split('@')[0],
-        avatarUrl:user.user_metadata?.avatar_url
+        avatarUrl:response.avatarUrl ? supabase.storage.from('avatars').getPublicUrl(response.avatarUrl).data.publicUrl : ""
       })
     })
-  },[fileId,quill,supabase])
+    return ()=>{
+      supabase.removeChannel(room)
+    }
+  },[fileId,quill,supabase,user])
   return (
     <>
     {/* {isConnected ? "connected" : "not connected"} */}
