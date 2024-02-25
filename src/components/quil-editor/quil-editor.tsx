@@ -140,14 +140,14 @@ const QuillEditor:React.FC<QuillEditorProps> = ({
 
   //restore-delete handler
   const restoreFileHandler = async () => {
-    if(dirType==="file" || !workspaceId) return;{
+    if(!workspaceId) return;
+    if(dirType==="file"){
       if(!folderId) return;
       dispatch({type:"UPDATE_FILE",payload:{file: {inTrash:""},fileId,workspaceId,folderId}})
       await updateFile({inTrash:""},fileId)
-      console.log("restored the file")
+      // console.log("restored the file")
     }
     if(dirType==="folder"){
-      if(!workspaceId) return;
       dispatch({type:"UPDATE_FOLDER",payload:{folder:{inTrash:""},folderId:fileId,workspaceId}})
       // console.log("i will fuck the world")
       await updateFolder({inTrash:""},fileId)
@@ -492,7 +492,7 @@ const QuillEditor:React.FC<QuillEditorProps> = ({
               This {dirType} is in trash
             </span>
             <Button size={"sm"} variant={"outline"} className='bg-transparent border-white text-white hovering:bg-white hover:text-[#EB5757]'
-              onClick={restoreFileHandler}
+              onClick={() => {restoreFileHandler()}}
             >
               Restore
             </Button >
