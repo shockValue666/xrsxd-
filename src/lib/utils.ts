@@ -25,9 +25,11 @@ export const getUrl = () => {
   let url = process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXT_PUBLIC_VERCEL_URL ?? "http://localhost:3000"; 
   url = url.includes('http') ? url : `https://${url}`;
   url = url.charAt(url.length-1) === '/' ? url : `${url}/`;
+  console.log("url from getUrl in utils: ", url);
   return url;
 }
 
+//10:52:00
 export const postData = async ({url,data}:{url:string,data?:{price:Price}}) => {
   console.log("posting url and data: ", url, data)
   const res:Response = await fetch(url,{
