@@ -43,6 +43,7 @@ const LoginPage = () => {
         //signins in user , the function is in lib/server-action/auth-actions,ts and it's a function using createRouteHandlerClient 
         //with cookies so maybe i will have to see it obv returns an error and a really interesting response
         const {error} = await actionLoginUser(formData);
+        console.log("error from auth login: ",error)
         if(error){
             form.reset();
             setSubmitError(error.message);
