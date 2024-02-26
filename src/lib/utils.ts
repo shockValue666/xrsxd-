@@ -22,7 +22,7 @@ export const toDateTime = (secs:number) => {
 }
 
 export const getUrl = () => {
-  let url = process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXT_PUBLIC_RAILWAY_URL ?? "http://localhost:3000"; 
+  let url = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"; 
   url = url.includes('http') ? url : `https://${url}`;
   url = url.charAt(url.length-1) === '/' ? url : `${url}/`;
   console.log("url from getUrl in utils: ", url);
